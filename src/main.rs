@@ -6,7 +6,8 @@
 //! viewport, you may want to look at `games/contributors.rs` or `ui/text.rs`.
 
 mod global_def;
-
+mod utils;
+use crate::utils::string_utils::*;
 use crate::global_def::global_define::RESOLUTION_720P;
 use bevy::window::WindowResolution;
 use bevy::{
@@ -14,8 +15,6 @@ use bevy::{
     ,
     text::{BreakLineOn, Text2dBounds},
 };
-use bevy::a11y::accesskit::TextAlign;
-use bevy::sprite::Anchor;
 
 fn main() {
     App::new()
@@ -28,6 +27,7 @@ fn main() {
             ..Default::default()
         }))
         .add_systems(Startup, setup)
+        .add_systems(Update,update_typing_text)
         // .add_systems(
         //     Update,
         //     (animate_translation, animate_rotation, animate_scale),
@@ -83,7 +83,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             builder.spawn(Text2dBundle {
                 text: Text {
                     sections: vec![TextSection::new(
-                        "欢迎游玩DS TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTX！\n(Unicode linebreaks)",
+                        "",
                         slightly_smaller_text_style.clone(),
                     )],
                     justify: JustifyText::Center,
@@ -96,38 +96,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 // ensure the text is drawn on top of the box
                 transform: Transform::from_translation(box_text_position.extend(1.0)),
                 ..default()
+            }).insert(TypingText {
+                full_text: string_auto_split("欢迎游玩DS TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTX！\n(Unicode linebreaks)",20),
+                displayed_text: "".to_string(),
+                current_index: 0,
+                timer: Timer::from_seconds(0.1, TimerMode::Once),
             });
         });
 }
-//
-// fn animate_translation(
-//     time: Res<Time>,
-//     mut query: Query<&mut Transform, (With<Text>, With<AnimateTranslation>)>,
-// ) {
-//     for mut transform in &mut query {
-//         transform.translation.x = 100.0 * time.elapsed_seconds().sin() - 400.0;
-//         transform.translation.y = 100.0 * time.elapsed_seconds().cos();
-//     }
-// }
-//
-// fn animate_rotation(
-//     time: Res<Time>,
-//     mut query: Query<&mut Transform, (With<Text>, With<AnimateRotation>)>,
-// ) {
-//     for mut transform in &mut query {
-//         transform.rotation = Quat::from_rotation_z(time.elapsed_seconds().cos());
-//     }
-// }
-//
-// fn animate_scale(
-//     time: Res<Time>,
-//     mut query: Query<&mut Transform, (With<Text>, With<AnimateScale>)>,
-// ) {
-//     // Consider changing font-size instead of scaling the transform. Scaling a Text2D will scale the
-//     // rendered quad, resulting in a pixellated look.
-//     for mut transform in &mut query {
-//         let scale = (time.elapsed_seconds().sin() + 1.1) * 2.0;
-//         transform.scale.x = scale;
-//         transform.scale.y = scale;
-//     }
-// }
+
+
