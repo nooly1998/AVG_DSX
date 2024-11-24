@@ -65,7 +65,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         font_size: 35.0,
         ..default()
     };
-    let box_size = Vec2::new(RESOLUTION_720P.0, RESOLUTION_720P.1*0.3);
+    let box_size = Vec2::new(RESOLUTION_720P.0 , RESOLUTION_720P.1*0.3);
     let box_position = Vec2::new(0.0, -RESOLUTION_720P.1/4f32);
     let box_text_position = Vec2::new(-RESOLUTION_720P.0/3f32,0.0);
 
@@ -86,7 +86,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         "",
                         slightly_smaller_text_style.clone(),
                     )],
-                    justify: JustifyText::Center,
+                    justify: JustifyText::Left,
                     linebreak_behavior: BreakLineOn::AnyCharacter,
                 },
                 text_2d_bounds: Text2dBounds {
@@ -97,12 +97,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 transform: Transform::from_translation(box_text_position.extend(1.0)),
                 ..default()
             }).insert(TypingText {
-                full_text: string_auto_split("欢迎游玩DS TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTX！\n(Unicode linebreaks)",20),
+                full_text: string_auto_split("欢迎游玩DS \n(Unicode linebreaks)",30),
                 displayed_text: "".to_string(),
                 current_index: 0,
-                timer: Timer::from_seconds(0.1, TimerMode::Once),
+                timer: Timer::from_seconds(0.2, TimerMode::Repeating),
             });
         });
 }
+
+
 
 
