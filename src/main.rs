@@ -11,8 +11,7 @@ use crate::utils::string_utils::*;
 use crate::global_def::global_define::RESOLUTION_720P;
 use bevy::window::WindowResolution;
 use bevy::{
-    prelude::*
-    ,
+    prelude::*,
     text::{BreakLineOn, Text2dBounds},
 };
 
@@ -69,18 +68,32 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let box_position = Vec2::new(0.0, -RESOLUTION_720P.1/4f32);
     let box_text_position = Vec2::new(-RESOLUTION_720P.0/3f32,0.0);
 
+    // commands
+    //     .spawn(SpriteBundle {
+    //         sprite: Sprite {
+    //             color: Color::srgb(0.25, 0.25, 0.75),
+    //             custom_size: Some(Vec2::new(box_size.x, box_size.y)),
+    //             ..default()
+    //         },
+    //         transform: Transform::from_translation(box_position.extend(2.0)),
+    //         ..default()
+    //     });
+
     commands
-        .spawn(SpriteBundle {
-            sprite: Sprite {
-                color: Color::srgb(0.25, 0.25, 0.75),
-                custom_size: Some(Vec2::new(box_size.x, box_size.y)),
-                ..default()
-            },
+        .spawn(NodeBundle {
+            style:Style {
+                display:Display::Flex,
+                width:Val::Percent(RESOLUTION_720P.0),
+                height:Val::Percent(RESOLUTION_720P.1*0.3),
+                padding: UiRect::left(Val::Px(RESOLUTION_720P.0 * 0.1)),
+                top:Val::Px(RESOLUTION_720P.1 * 0.7),
+                ..default()},
+            background_color: BackgroundColor::from(Color::srgb(0.25, 0.25, 0.75)),
             transform: Transform::from_translation(box_position.extend(2.0)),
             ..default()
         })
         .with_children(|builder| {
-            builder.spawn(Text2dBundle {
+            builder.spawn(TextBundle {
                 text: Text {
                     sections: vec![TextSection::new(
                         "",
@@ -88,10 +101,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     )],
                     justify: JustifyText::Left,
                     linebreak_behavior: BreakLineOn::AnyCharacter,
-                },
-                text_2d_bounds: Text2dBounds {
-                    // Wrap text in the rectangle
-                    size: box_size,
                 },
                 // ensure the text is drawn on top of the box
                 transform: Transform::from_translation(box_text_position.extend(1.0)),
