@@ -12,7 +12,7 @@ use crate::global_def::global_define::RESOLUTION_720P;
 use bevy::window::WindowResolution;
 use bevy::{
     prelude::*,
-    text::{BreakLineOn, Text2dBounds},
+    text::{BreakLineOn},
 };
 
 fn main() {
@@ -68,24 +68,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let box_position = Vec2::new(0.0, -RESOLUTION_720P.1/4f32);
     let box_text_position = Vec2::new(-RESOLUTION_720P.0/3f32,0.0);
 
-    // commands
-    //     .spawn(SpriteBundle {
-    //         sprite: Sprite {
-    //             color: Color::srgb(0.25, 0.25, 0.75),
-    //             custom_size: Some(Vec2::new(box_size.x, box_size.y)),
-    //             ..default()
-    //         },
-    //         transform: Transform::from_translation(box_position.extend(2.0)),
-    //         ..default()
-    //     });
-
     commands
         .spawn(NodeBundle {
             style:Style {
                 display:Display::Flex,
-                width:Val::Percent(RESOLUTION_720P.0),
-                height:Val::Percent(RESOLUTION_720P.1*0.3),
-                padding: UiRect::left(Val::Px(RESOLUTION_720P.0 * 0.1)),
+                width:Val::Percent(box_size.x),
+                height:Val::Percent(box_size.y),
+                padding: UiRect::all(Val::Px(RESOLUTION_720P.0 * 0.01)),
                 top:Val::Px(RESOLUTION_720P.1 * 0.7),
                 ..default()},
             background_color: BackgroundColor::from(Color::srgb(0.25, 0.25, 0.75)),
@@ -106,7 +95,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 transform: Transform::from_translation(box_text_position.extend(1.0)),
                 ..default()
             }).insert(TypingText {
-                full_text: string_auto_split("欢迎游玩DS \n(Unicode linebreaks)",30),
+                full_text: string_auto_split("欢迎游玩DS \n(Unicode linebreaks)",RESOLUTION_720P.0,35),
                 displayed_text: "".to_string(),
                 current_index: 0,
                 timer: Timer::from_seconds(0.2, TimerMode::Repeating),

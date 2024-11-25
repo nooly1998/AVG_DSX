@@ -3,9 +3,11 @@ pub mod string_utils{
     use bevy::prelude::{Component, MouseButton, Query, Res, Text, Time};
     use bevy::time::Timer;
 
-    pub fn string_auto_split(value: impl Into<String>, len: usize) -> String {
+    pub fn string_auto_split(value: impl Into<String>, len_px: f32, font_size:usize) -> String {
+        let len = (len_px * 1000.0) as usize / font_size / 1000;
         let val = value.into();
-        let vals = val.split(",").collect::<Vec<&str>>();
+        let vals = val.split(",")
+                                .collect::<Vec<&str>>();
         let mut result = String::new();
 
         for item in vals.iter()
