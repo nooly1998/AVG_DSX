@@ -4,14 +4,6 @@ pub mod string_utils {
     use bevy::prelude::*;
     use bevy::time::Timer;
 
-    fn val_to_f32(val: Val) -> Option<f32> {
-        match val {
-            Val::Px(value) => Some(value),        // 提取像素值
-            Val::Percent(value) => Some(value),  // 提取百分比值
-            _ => None,                           // 对于 Auto 和 Undefined 返回 None
-        }
-    }
-
     pub fn string_auto_split(value: impl Into<String>, len_px: f32, font_size: usize) -> String {
         let len = (len_px * 1000.0) as usize / font_size / 1000;
         let val = value.into();
@@ -67,7 +59,7 @@ pub mod string_utils {
         // 更新子容器的位置
         if scroll_delta != 0.0 {
             for (mut style, mut content) in scroll_query.iter_mut() {
-                let mut cst = content.current_top.clone();
+                let cst = content.current_top.clone();
                 let len = content.current_len;
                 print!("len:{:?},pl:{:?},cst{:?},pt{:?}\n", len, content.parent_len, cst, content.parent_top);
                 if cst + scroll_delta <= (content.parent_top + content.parent_len - len) && cst + scroll_delta >= content.parent_top
@@ -76,7 +68,6 @@ pub mod string_utils {
                     println!("has current");
                     style.top = Val::Px(cst + scroll_delta - content.parent_top);
                     content.current_top += scroll_delta;
-                    cst += scroll_delta
                 }
             }
         }
