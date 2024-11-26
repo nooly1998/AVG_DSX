@@ -1,13 +1,22 @@
-pub mod string_utils{
+pub mod string_utils {
+    use bevy::input::mouse::MouseWheel;
     use bevy::input::ButtonInput;
-    use bevy::prelude::{Component, MouseButton, Query, Res, Text, Time};
+    use bevy::prelude::*;
     use bevy::time::Timer;
 
-    pub fn string_auto_split(value: impl Into<String>, len_px: f32, font_size:usize) -> String {
+    fn val_to_f32(val: Val) -> Option<f32> {
+        match val {
+            Val::Px(value) => Some(value),        // 提取像素值
+            Val::Percent(value) => Some(value),  // 提取百分比值
+            _ => None,                           // 对于 Auto 和 Undefined 返回 None
+        }
+    }
+
+    pub fn string_auto_split(value: impl Into<String>, len_px: f32, font_size: usize) -> String {
         let len = (len_px * 1000.0) as usize / font_size / 1000;
         let val = value.into();
         let vals = val.split(",")
-                                .collect::<Vec<&str>>();
+            .collect::<Vec<&str>>();
         let mut result = String::new();
 
         for item in vals.iter()
@@ -28,6 +37,15 @@ pub mod string_utils{
 
     #[derive(Component)]
     #[derive(Clone)]
+    pub struct ScrollBar {
+        pub current_top: f32,
+        pub current_len: f32,
+        pub parent_top: f32,
+        pub parent_len: f32,
+    }
+
+    #[derive(Component)]
+    #[derive(Clone)]
     pub struct TypingText {
         pub(crate) full_text: String,
         pub(crate) displayed_text: String,
@@ -35,13 +53,41 @@ pub mod string_utils{
         pub(crate) timer: Timer,
     }
 
+    pub fn scroll_view_system(
+        mut scroll_query: Query<(&mut Style, &mut ScrollBar)>,
+        mut mouse_wheel_events: EventReader<MouseWheel>,
+    ) {
+        let mut scroll_delta = 0.0;
+
+        // 读取鼠标滚轮事件
+        for event in mouse_wheel_events.par_read() {
+            scroll_delta += event.0.y; // 每次滚动的像素值
+        }
+
+        // 更新子容器的位置
+        if scroll_delta != 0.0 {
+            for (mut style, mut content) in scroll_query.iter_mut() {
+                let mut cst = content.current_top.clone();
+                let len = content.current_len;
+                print!("len:{:?},pl:{:?},cst{:?},pt{:?}\n", len, content.parent_len, cst, content.parent_top);
+                if cst + scroll_delta <= (content.parent_top + content.parent_len - len) && cst + scroll_delta >= content.parent_top
+                {
+                    println!("compare! {:?}\n", scroll_delta);
+                    println!("has current");
+                    style.top = Val::Px(cst + scroll_delta - content.parent_top);
+                    content.current_top += scroll_delta;
+                    cst += scroll_delta
+                }
+            }
+        }
+    }
+
     pub fn update_typing_text(
         time: Res<Time>,
-        input:Res<ButtonInput<MouseButton>>,
+        input: Res<ButtonInput<MouseButton>>,
         mut query: Query<(&mut TypingText, &mut Text)>,
     ) {
         for (mut typing_text, mut text) in query.iter_mut() {
-            
             if input.just_pressed(MouseButton::Left) && typing_text.current_index < typing_text.full_text.len() {
                 typing_text.displayed_text = typing_text.full_text.clone();
                 typing_text.current_index = typing_text.full_text.len();
@@ -49,7 +95,7 @@ pub mod string_utils{
                 text.sections[0].value = typing_text.displayed_text.clone();
                 return;
             }
-            
+
             typing_text.timer.tick(time.delta());
             if typing_text.timer.finished() && typing_text.current_index < typing_text.full_text.len() {
                 let clone_text = typing_text.clone();
