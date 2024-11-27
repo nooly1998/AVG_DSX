@@ -47,13 +47,6 @@ pub mod string_utils {
         pub(crate) timer: Timer,
     }
 
-    // #[derive(Component, Clone)]
-    // pub struct ScrollView {
-    //     pub view_top: f32,
-    //     pub view_len: f32,
-    //     pub content_len: f32,
-    // }
-
 
     pub fn scroll_view_system(
         mut scroll_query: Query<(&mut Style, &mut ScrollView)>,
