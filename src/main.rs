@@ -7,6 +7,7 @@
 
 mod global_def;
 mod utils;
+
 use crate::global_def::global_define::RESOLUTION_720P;
 use crate::utils::string_utils::*;
 use bevy::ui::Val::Px;
@@ -27,7 +28,7 @@ fn main() {
             ..Default::default()
         }))
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_typing_text, scroll_view_system))
+        .add_systems(Update, (update_typing_text, scroll_view_system,scroll_bar_drag_system,scroll_view_drag_system))
         // .add_systems(
         //     Update,
         //     (animate_translation, animate_rotation, animate_scale),
@@ -133,12 +134,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
             Name::new("content_view")))
-            // .insert(ScrollableContent{
-            //     parent_top:view_position.y,
-            //     parent_bottom:view_position.y + view_size.y,
-            //     current_top : view_position.y,
-            //     current_bottom:view_position.y + cover_size.y,
-            // })
+            .insert(ScrollView{
+                content_len:cover_size.y + view_size.y,
+                view_top : view_position.y,
+                view_len:view_size.y,
+                bar:false,
+                ..default()
+            })
             .with_children(|content| {
             for i in 0..10 {
                 content.spawn(TextBundle {
@@ -184,11 +186,15 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             transform: Transform::from_translation(view_position.extend(2.0)),
             background_color: BackgroundColor::from(Color::srgb(0.5, 0.5, 0.5)),
             ..default()
-        },Name::new("scroll_status"),)).insert(ScrollBar{
+        },Name::new("scroll_status"),)).insert(ScrollView{
             parent_top: view_position.y,
             parent_len: view_size.y,
             current_top: view_position.y,
             current_len: 20.0,
+            is_dragging:false,
+            drag_offset:0.0,
+            bar:true,
+            ..default()
         });
 
     });
