@@ -50,6 +50,9 @@ pub mod string_utils {
     #[derive(Component)]
     pub struct TextFiledHidden;
 
+    #[derive(Component)]
+    pub struct TextFiledHiddenButton;
+
     pub fn scroll_view_system(
         mut scroll_query: Query<(&mut Style, &mut ScrollView)>,
         mut mouse_wheel_events: EventReader<MouseWheel>,
@@ -187,9 +190,26 @@ pub mod string_utils {
         }
     }
 
-    // pub fn text_filed_hidden(filed_query:Query<Style, With<TextFiledHidden>>){
-    //     for style in filed_query.iter(){
-    //         style.visibility = Visibility::Hidden;
-    //     }
-    // }
+    pub fn text_filed_hidden(mut filed_query: Query<&mut Visibility, With<TextFiledHidden>>,
+                                mut button_query:Query<&Interaction,(Changed<Interaction>,
+                                                                          With<TextFiledHiddenButton>)
+                                >){
+        // println!("button pressed!");
+        for button in button_query.iter() {
+            match *button {
+                Interaction::Pressed =>{
+                    for mut node in filed_query.iter_mut(){
+                        let vcp = (*node).clone();
+                        // println!("vcp:{:?}",vcp);
+                        match vcp {
+                            Visibility::Inherited => {*node = Visibility::Hidden;}
+                            Visibility::Hidden => {*node = Visibility::Inherited;}
+                            _ => {return;}
+                        }
+                    }
+                },
+                _ => {continue;}
+            }
+        }
+    }
 }

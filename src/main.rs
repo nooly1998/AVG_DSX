@@ -1,20 +1,15 @@
-//! Shows text rendering with moving, rotating and scaling text.
-//!
-//! Note that this uses [`Text2dBundle`] to display text alongside your other entities in a 2D scene.
-//!
-//! For an example on how to render text as part of a user interface, independent from the world
-//! viewport, you may want to look at `games/contributors.rs` or `ui/text.rs`.
 
 mod global_def;
 mod utils;
 
 use crate::global_def::global_define::RESOLUTION_720P;
 use crate::utils::string_utils::*;
-use bevy::ui::Val::Px;
-use bevy::window::WindowResolution;
 use bevy::{
     prelude::*,
     text::BreakLineOn,
+    ui::Val::Px,
+    ui::*,
+    window::WindowResolution
 };
 
 fn main() {
@@ -28,7 +23,7 @@ fn main() {
             ..Default::default()
         }))
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_typing_text, scroll_view_system,scroll_bar_drag_system,scroll_view_drag_system))
+        .add_systems(Update, (update_typing_text, scroll_view_system,scroll_bar_drag_system,scroll_view_drag_system,text_filed_hidden))
         // .add_systems(
         //     Update,
         //     (animate_translation, animate_rotation, animate_scale),
@@ -85,6 +80,49 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         })
         .with_children(|builder| {
+
+            builder.spawn((NodeBundle {
+                style: Style {
+                    top:Px(-RESOLUTION_720P.1 * 0.05),
+                    width:Px(RESOLUTION_720P.0),
+                    height:Px(30.0),
+                    display:Display::Flex,
+                    ..default()
+                },
+                transform:Transform::from_translation(box_text_position.extend(1.0)),
+                ..default()
+            },Name::new("ButtonList"))).with_children(|button_list| {
+                button_list.spawn( (
+                    ButtonBundle{
+                        style:{
+                            Style{
+                                width: Px(150.0),
+                                height: Px(30.0),
+                                border: UiRect::all(Px(5.0)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            }
+                        },
+                        interaction:Interaction::None,
+                        border_color: BorderColor(Color::BLACK),
+                        border_radius: BorderRadius::MAX,
+                        background_color: Color::srgb(0.15, 0.15, 0.15).into(),
+                        ..default()
+                },Name::new("TextFiledHidden"),TextFiledHiddenButton)).with_children(|button_bundle| {
+                    button_bundle.spawn((TextBundle::from_section(
+                        "FiledHidden",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 18.0,
+                            color: Color::srgb(0.9, 0.9, 0.9),
+                        },
+                    )));
+                });
+            });
+
             builder.spawn(TextBundle {
                 text: Text {
                     sections: vec![TextSection::new(
