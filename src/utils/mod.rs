@@ -1,5 +1,5 @@
 pub mod string_utils {
-    use bevy::input::mouse::MouseWheel;
+    use bevy::input::mouse::{MouseWheel};
     use bevy::input::ButtonInput;
     use bevy::prelude::*;
     use bevy::time::Timer;
@@ -47,6 +47,8 @@ pub mod string_utils {
         pub(crate) timer: Timer,
     }
 
+    #[derive(Component)]
+    pub struct TextFiledHidden;
 
     pub fn scroll_view_system(
         mut scroll_query: Query<(&mut Style, &mut ScrollView)>,
@@ -114,15 +116,18 @@ pub mod string_utils {
 
     pub fn scroll_bar_drag_system(
         mut scroll_query: Query<(&mut Style, &mut ScrollView)>,
+        mut current_window:Query<&mut Window>,
         mut mouse_button_input: ResMut<ButtonInput<MouseButton>>,
-        mut cursor_movement_events: EventReader<CursorMoved>,
     ) {
+        println!("windows size:{:?}",current_window.iter().len());
         for (mut style, mut scroll_bar) in scroll_query.iter_mut() {
             // 判断是否有鼠标按钮被按下
             if mouse_button_input.just_pressed(MouseButton::Left) {
+                println!("scroll_bar_pressed");
                 // 获取鼠标点击位置
-                for event in cursor_movement_events.par_read() {
-                    let cursor_position = event.0.position;
+                for window in current_window.iter() {
+                    let Some(cursor_position) = window.cursor_position() else { continue };
+                    println!("cursor_position: {:?}", cursor_position);
                     if cursor_position.y >= scroll_bar.current_top
                         && cursor_position.y <= scroll_bar.current_top + scroll_bar.current_len
                     {
@@ -135,8 +140,8 @@ pub mod string_utils {
             // 判断是否正在拖动
             if scroll_bar.is_dragging {
                 // 获取鼠标当前位置
-                for event in cursor_movement_events.par_read() {
-                    let cursor_position = event.0.position;
+                for window in current_window.iter() {
+                    let Some(cursor_position) = window.cursor_position()else { continue };
                     let new_top = cursor_position.y - scroll_bar.drag_offset;
 
                     // 确保新的位置在父容器的范围内
@@ -181,4 +186,10 @@ pub mod string_utils {
             view_style.top = Val::Px(scroll_view.parent_top - scroll_view.view_top);
         }
     }
+
+    // pub fn text_filed_hidden(filed_query:Query<Style, With<TextFiledHidden>>){
+    //     for style in filed_query.iter(){
+    //         style.visibility = Visibility::Hidden;
+    //     }
+    // }
 }

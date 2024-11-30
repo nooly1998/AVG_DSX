@@ -76,8 +76,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 display: Display::Flex,
                 width: Val::Percent(box_size.x),
                 height: Val::Percent(box_size.y),
-                padding: UiRect::all(Val::Px(RESOLUTION_720P.0 * 0.01)),
-                top: Val::Px(RESOLUTION_720P.1 * 0.7),
+                padding: UiRect::all(Px(RESOLUTION_720P.0 * 0.01)),
+                top: Px(RESOLUTION_720P.1 * 0.7),
                 ..default()
             },
             background_color: BackgroundColor::from(Color::srgb(0.25, 0.25, 0.75)),
@@ -122,7 +122,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             background_color: BackgroundColor::from(Color::srgb(0.25, 0.25, 0.75)),
             transform: Transform::from_translation(view_position.extend(2.0)),
             ..default()
-        }, Name::new("scroll_view"))).with_children(|builder| {
+        }, Name::new("scroll_view"),TextFiledHidden))
+        .with_children(|builder| {
         builder.spawn((
             NodeBundle {
                 style: Style {
@@ -153,7 +154,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         },
                     ),
                     style: Style {
-                        margin: UiRect::all(Val::Px(10.0)),
+                        margin: UiRect::all(Px(10.0)),
                         ..default()
                     },
                     ..default()
@@ -174,9 +175,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             background_color: BackgroundColor::from(Color::srgb(0.9, 0.9, 0.9)),
             transform: Transform::from_translation(view_position.extend(5.0)),
             ..default()
-        },
-
-    )).with_children(|status| {
+        },Name::new("scroll_bar"),TextFiledHidden))
+        .with_children(|status| {
         status.spawn((NodeBundle {
             style: Style {
                 width: Px(16.0),
@@ -198,6 +198,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 
     });
+
+
 }
 
 
