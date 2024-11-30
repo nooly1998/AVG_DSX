@@ -66,15 +66,15 @@ pub mod string_utils {
             for (mut style, mut content) in scroll_query.iter_mut() {
                 let cst = content.current_top.clone();
                 let len = content.current_len;
-                print!(
-                    "len:{:?},pl:{:?},cst{:?},pt{:?}\n",
-                    len, content.parent_len, cst, content.parent_top
-                );
+                // print!(
+                //     "len:{:?},pl:{:?},cst{:?},pt{:?}\n",
+                //     len, content.parent_len, cst, content.parent_top
+                // );
                 if cst + scroll_delta <= (content.parent_top + content.parent_len - len)
                     && cst + scroll_delta >= content.parent_top
                 {
-                    println!("compare! {:?}\n", scroll_delta);
-                    println!("has current");
+                    // println!("compare! {:?}\n", scroll_delta);
+                    // println!("has current");
                     style.top = Val::Px(cst + scroll_delta - content.parent_top);
                     content.current_top += scroll_delta;
                 }
@@ -119,15 +119,15 @@ pub mod string_utils {
         mut current_window:Query<&mut Window>,
         mut mouse_button_input: ResMut<ButtonInput<MouseButton>>,
     ) {
-        println!("windows size:{:?}",current_window.iter().len());
+        // println!("windows size:{:?}",current_window.iter().len());
         for (mut style, mut scroll_bar) in scroll_query.iter_mut() {
             // 判断是否有鼠标按钮被按下
             if mouse_button_input.just_pressed(MouseButton::Left) {
-                println!("scroll_bar_pressed");
+                // println!("scroll_bar_pressed");
                 // 获取鼠标点击位置
                 for window in current_window.iter() {
                     let Some(cursor_position) = window.cursor_position() else { continue };
-                    println!("cursor_position: {:?}", cursor_position);
+                    // println!("cursor_position: {:?}", cursor_position);
                     if cursor_position.y >= scroll_bar.current_top
                         && cursor_position.y <= scroll_bar.current_top + scroll_bar.current_len
                     {
