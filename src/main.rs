@@ -1,6 +1,7 @@
 
 mod global_def;
 mod utils;
+mod plugins;
 
 use crate::global_def::global_define::RESOLUTION_720P;
 use crate::utils::string_utils::*;
@@ -11,6 +12,7 @@ use bevy::{
     ui::*,
     window::WindowResolution
 };
+use crate::plugins::scroll_view::ScrollViewPlugin;
 
 fn main() {
     App::new()
@@ -23,11 +25,8 @@ fn main() {
             ..Default::default()
         }))
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_typing_text, scroll_view_system,scroll_bar_drag_system,scroll_view_drag_system,text_filed_hidden))
-        // .add_systems(
-        //     Update,
-        //     (animate_translation, animate_rotation, animate_scale),
-        // )
+        .add_systems(Update, (update_typing_text))
+        .add_plugins(ScrollViewPlugin)
         .run();
 }
 
@@ -81,161 +80,36 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         })
         .with_children(|builder| {
 
-            builder.spawn((NodeBundle {
-                style: Style {
-                    top:Px(-RESOLUTION_720P.1 * 0.05),
-                    width:Px(RESOLUTION_720P.0),
-                    height:Px(30.0),
-                    display:Display::Flex,
-                    ..default()
-                },
-                transform:Transform::from_translation(box_text_position.extend(1.0)),
-                ..default()
-            },Name::new("ButtonList"))).with_children(|button_list| {
-                button_list.spawn( (
-                    ButtonBundle{
-                        style:{
-                            Style{
-                                width: Px(150.0),
-                                height: Px(30.0),
-                                border: UiRect::all(Px(5.0)),
-                                // horizontally center child text
-                                justify_content: JustifyContent::Center,
-                                // vertically center child text
-                                align_items: AlignItems::Center,
-                                ..default()
-                            }
-                        },
-                        interaction:Interaction::None,
-                        border_color: BorderColor(Color::BLACK),
-                        border_radius: BorderRadius::MAX,
-                        background_color: Color::srgb(0.15, 0.15, 0.15).into(),
-                        ..default()
-                },Name::new("TextFiledHidden"),TextFiledHiddenButton)).with_children(|button_bundle| {
-                    button_bundle.spawn((TextBundle::from_section(
-                        "FiledHidden",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 18.0,
-                            color: Color::srgb(0.9, 0.9, 0.9),
-                        },
-                    )));
-                });
-            });
-
-            builder.spawn(TextBundle {
-                text: Text {
-                    sections: vec![TextSection::new(
-                        "",
-                        slightly_smaller_text_style.clone(),
-                    )],
-                    justify: JustifyText::Left,
-                    linebreak_behavior: BreakLineOn::AnyCharacter,
-                },
-                // ensure the text is drawn on top of the box
-                transform: Transform::from_translation(box_text_position.extend(1.0)),
-                ..default()
-            }).insert(TypingText {
-                full_text: string_auto_split("欢迎游玩DS \n(Unicode linebreaks)", RESOLUTION_720P.0, 35),
-                displayed_text: "".to_string(),
-                current_index: 0,
-                timer: Timer::from_seconds(0.2, TimerMode::Repeating),
-            });
-        });
-
-    let view_size = Vec2::new(RESOLUTION_720P.0 * 0.3, RESOLUTION_720P.1 * 0.2);
-    let view_position = Vec2::new(RESOLUTION_720P.0 * 0.3, RESOLUTION_720P.1 * 0.4);
-    let cover_size = Vec2::new(RESOLUTION_720P.0 * 0.3, RESOLUTION_720P.1);
-
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                width: Px(view_size.x),
-                height: Px(view_size.y),
-                left: Px(view_position.x),
-                top: Px(view_position.y),
-                overflow: Overflow::clip(),
-                ..default()
-            },
-            background_color: BackgroundColor::from(Color::srgb(0.25, 0.25, 0.75)),
-            transform: Transform::from_translation(view_position.extend(2.0)),
-            ..default()
-        }, Name::new("scroll_view"),TextFiledHidden))
-        .with_children(|builder| {
-        builder.spawn((
-            NodeBundle {
-                style: Style {
-                    width: Px(cover_size.x - 16.0),
-                    height: Px(cover_size.y),
-                    left: Px(16.0),
-                    ..default()
-                },
-                ..default()
-            },
-            Name::new("content_view")))
-            .insert(ScrollView{
-                content_len:cover_size.y + view_size.y,
-                view_top : view_position.y,
-                view_len:view_size.y,
-                bar:false,
-                ..default()
-            })
-            .with_children(|content| {
-            for i in 0..10 {
-                content.spawn(TextBundle {
-                    text: Text::from_section(
-                        format!("Item {}", i + 1),
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 30.0,
-                            color: Color::BLACK,
-                        },
-                    ),
-                    style: Style {
-                        margin: UiRect::all(Px(10.0)),
+            builder.spawn((
+                NodeBundle {
+                    style:Style{
                         ..default()
                     },
                     ..default()
+            })).with_children(|button_bundle| {
+                button_bundle.spawn(TextBundle {
+                    text: Text {
+                        sections: vec![TextSection::new(
+                            "",
+                            slightly_smaller_text_style.clone(),
+                        )],
+                        justify: JustifyText::Left,
+                        linebreak_behavior: BreakLineOn::AnyCharacter,
+                    },
+                    // ensure the text is drawn on top of the box
+                    transform: Transform::from_translation(box_text_position.extend(1.0)),
+                    ..default()
+                }).insert(TypingText {
+                    full_text: string_auto_split("欢迎游玩DS \n开始游戏", RESOLUTION_720P.0, 35),
+                    displayed_text: "".to_string(),
+                    current_index: 0,
+                    timer: Timer::from_seconds(0.2, TimerMode::Repeating),
                 });
-            }
-        });
+            });
 
         });
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                width: Px(16.0),
-                height: Px(view_size.y),
-                left: Px(view_position.x - 16.0),
-                top: Px(view_position.y),
-                ..default()
-            },
-            background_color: BackgroundColor::from(Color::srgb(0.9, 0.9, 0.9)),
-            transform: Transform::from_translation(view_position.extend(5.0)),
-            ..default()
-        },Name::new("scroll_bar"),TextFiledHidden))
-        .with_children(|status| {
-        status.spawn((NodeBundle {
-            style: Style {
-                width: Px(16.0),
-                height: Px(20.0),
-                ..default()
-            },
-            transform: Transform::from_translation(view_position.extend(2.0)),
-            background_color: BackgroundColor::from(Color::srgb(0.5, 0.5, 0.5)),
-            ..default()
-        },Name::new("scroll_status"),)).insert(ScrollView{
-            parent_top: view_position.y,
-            parent_len: view_size.y,
-            current_top: view_position.y,
-            current_len: 20.0,
-            is_dragging:false,
-            drag_offset:0.0,
-            bar:true,
-            ..default()
-        });
 
-    });
+
 
 
 }
