@@ -7,30 +7,93 @@ use bevy::math::Vec2;
 use bevy::prelude::Val::Px;
 use bevy::prelude::*;
 
+
+/// A Bevy Plugin for creating a scroll view functionality.
+///
+/// This plugin adds systems for managing a user interface scrollable
+/// view, handling user inputs for scrolling and dragging interactions.
+///
+/// When added to an app, it initializes entities
+/// and components for the scroll view.
+///
+/// Usage:
+///
+/// ```rust
+/// use crate::ScrollViewPlugin;
+/// use bevy::prelude::*;
+///
+/// fn main() {
+///     App::new()
+///         .add_plugins(DefaultPlugins)
+///         .add_plugin(ScrollViewPlugin)
+///         .run();
+/// }
+/// ```
 pub struct ScrollViewPlugin;
 
+/// A resource struct for managing scroll view updates.
+///
+/// This resource keeps track of the current value of the scroll view
+/// to handle updates and modifications.
 #[derive(Resource)]
 struct ScrollViewResource {
     value: i32,
 }
 
+/// A struct representing a scroll view component.
+///
+/// This struct is used to track the state and configuration
+/// of a scroll view UI element, including its dimensions,
+/// position, and interaction state.
 #[derive(Component, Clone, Default)]
 pub struct ScrollView {
+    /// The current top position of the scroll view in pixels.
     pub current_top: f32,
+
+    /// The current length (height) of the scroll view in pixels.
     pub current_len: f32,
+
+    /// The top position of the parent container in pixels.
     pub parent_top: f32,
+
+    /// The length (height) of the parent container in pixels.
     pub parent_len: f32,
-    pub is_dragging: bool, // 追踪是否正在拖动
-    pub drag_offset: f32,  // 追踪拖动开始时的偏移
+
+    /// Flag indicating whether the scroll view is currently being dragged.
+    ///
+    /// Used to track the dragging state during user interaction.
+    pub is_dragging: bool,
+
+    /// The offset value when dragging starts, in pixels.
+    ///
+    /// Used to calculate the new position based on initial click position.
+    pub drag_offset: f32,
+
+    /// Flag indicating whether this instance represents a scroll bar.
     pub bar: bool,
+
+    /// The top position for the view window relative to its parent.
     pub view_top: f32,
+
+    /// The length (height) of the view window in pixels.
     pub view_len: f32,
+
+    /// The total length (height) of the scrollable content in pixels.
     pub content_len: f32,
 }
 
+/// Component representing a hidden text field.
+///
+/// This component can be used to associate entities that should be
+/// treated as hidden text fields within the user interface.
 #[derive(Component)]
 pub struct TextFiledHidden;
 
+/// Component representing a button for hiding a text field.
+///
+/// This component can be used to identify the button entity
+/// associated with the action to hide or show text fields
+/// within the user interface.
 #[derive(Component)]
 pub struct TextFiledHiddenButton;
 
@@ -50,6 +113,23 @@ impl Plugin for ScrollViewPlugin {
     }
 }
 
+/// Spawns UI entities with scrolling capabilities for a Bevy application.
+///
+/// This system sets up a scrolling view with a hidden text field button,
+/// a scrollable content area, and a scroll bar.
+///
+/// It organizes UI components vertically, providing a paginated view
+/// for the content items.
+///
+/// # Parameters
+/// - `commands`: Command queue for spawning entities.
+/// - `asset_server`: Access to the asset loader for loading fonts.
+///
+/// # Panics
+/// This function might panic if any of the UI component initialization fails.
+///
+///
+/// Ensure the appropriate resources (e.g., font files) exist in your asset folder.
 fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>) {
     let box_size = Vec2::new(RESOLUTION_720P.0, RESOLUTION_720P.1 * 0.3);
     let box_text_position = Vec2::new(-RESOLUTION_720P.0 / 3f32, 0.0);
