@@ -1,5 +1,6 @@
 use crate::global_def::global_define::RESOLUTION_720P;
 use bevy::asset::AssetServer;
+use bevy::audio::{PlaybackMode, Volume};
 use bevy::color::Color;
 use bevy::math::{Vec2, Vec3};
 use bevy::prelude::Val::Px;
@@ -19,7 +20,7 @@ impl Plugin for ScenePlayPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(ScrollViewResource { value: 0.0 })
             .add_systems(Startup, spawn_entities)
-            .add_systems(Update, (update_typing_text));
+            .add_systems(Update, (update_typing_text,control_music_play));
     }
 }
 
@@ -30,6 +31,9 @@ pub struct TypingText {
     pub(crate) current_index: usize,
     pub(crate) timer: Timer,
 }
+
+#[derive(Component,Clone)]
+pub struct AudioPlayControl;
 
 fn string_auto_split(value: impl Into<String>, len_px: f32, font_size: usize) -> String {
     let len = (len_px * 1000.0) as usize / font_size / 1000;
@@ -50,6 +54,39 @@ fn string_auto_split(value: impl Into<String>, len_px: f32, font_size: usize) ->
     }
 
     result
+}
+
+fn control_music_play(mut playback_query: Query<&AudioSink>,
+                      mut text_query: Query<&mut Text>,
+                      mut button_query: Query<(&Interaction,&Children),(Changed<Interaction>,With<AudioPlayControl>)>) {
+    for (button,children) in button_query.iter_mut() {
+        match button {
+            Interaction::Pressed =>{
+                println!("audio ctl button is pressed");
+                for sink in playback_query.iter_mut() {
+                    if sink.is_paused(){
+                        sink.toggle();
+                        // 改变按钮上的文本
+                        for &child in children.iter() {
+                            if let Ok(mut text) = text_query.get_mut(child) {
+                                text.sections[0].value = "AudioPlay".to_string(); // 修改文本
+                            }
+                        }
+                    }
+                    else{
+                        sink.toggle();
+                        // 改变按钮上的文本
+                        for &child in children.iter() {
+                            if let Ok(mut text) = text_query.get_mut(child) {
+                                text.sections[0].value = "StopPlay".to_string(); // 修改文本
+                            }
+                        }
+                    }
+                }
+            }
+            _=>{return;}
+        }
+    }
 }
 
 fn update_typing_text(
@@ -99,10 +136,7 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn(SpriteBundle {
         texture: character_handle,
-        transform: Transform {
-            translation: Vec3::new(-(RESOLUTION_720P.0 / 4f32), -0.0, 1.0), // Position it at the center
-            ..Default::default()
-        },
+        transform: Transform::from_translation(Vec3::new(-(RESOLUTION_720P.0 / 4f32), 0.0, 1.0)),
         ..Default::default()
     });
 
@@ -164,4 +198,17 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>) {
                         });
                 });
         });
+
+    // 加载音频文件
+    let music = asset_server.load("music/bgmusic1.ogg");
+
+    // 播放音频
+    commands.spawn(AudioBundle {
+        source: music,
+        settings: PlaybackSettings {
+            mode: PlaybackMode::Loop, // 循环播放
+            volume: Volume::new(0.3), // 音量设置为 50%
+            ..default()
+        },
+    });
 }
