@@ -11,6 +11,7 @@ use bevy::time::Timer;
 
 pub struct ScenePlayPlugin;
 
+/// A resource that holds a handle to an audio instance for controlling playback.
 #[derive(Resource)]
 struct InstanceHandle(Handle<AudioInstance>);
 
@@ -22,6 +23,14 @@ impl Plugin for ScenePlayPlugin {
     }
 }
 
+
+/// Represents a text component with typing effect.
+///
+/// # Fields
+/// - `full_text`: The complete text string that will be displayed typing effect.
+/// - `displayed_text`: The portion of the text currently displayed on screen.
+/// - `current_index`: The index of the next character to display from the full text.
+/// - `timer`: Timer to control the typing speed.
 #[derive(Component, Clone)]
 pub struct TypingText {
     pub(crate) full_text: String,
@@ -33,6 +42,20 @@ pub struct TypingText {
 #[derive(Component, Clone)]
 pub struct AudioPlayControl;
 
+
+/// Splits a string into lines based on pixel width and font size.
+///
+/// # Parameters
+/// - `value`: The string to split. Can be any type that converts into a `String`.
+/// - `len_px`: The maximum line length in pixels.
+/// - `font_size`: The size of the font used to measure character width.
+///
+/// # Returns
+/// A `String` with newline characters embedded to split the input into lines of specified pixel length.
+///
+/// The function attempts to place newline characters such that no line exceeds
+/// the length in pixels defined by `len_px`, assuming each character is roughly
+/// `font_size` wide.
 fn string_auto_split(value: impl Into<String>, len_px: f32, font_size: usize) -> String {
     let len = (len_px * 1000.0) as usize / font_size / 1000;
     let val = value.into();
@@ -211,17 +234,4 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio:
 
     let handle = audio.play(music).looped().handle();
     commands.insert_resource(InstanceHandle(handle));
-
-    // commands.spawn(AudioBundle {
-    //     source: music,
-    //     settings: PlaybackSettings {
-    //         mode: PlaybackMode::Loop, // 循环播放
-    //         volume: Volume::new(0.3), // 音量设置为 50%
-    //         ..default()
-    //     },
-    // });
-}
-
-fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
-    audio.play(asset_server.load("music/bgmusic1.ogg")).looped();
 }
