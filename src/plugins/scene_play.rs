@@ -1,26 +1,24 @@
 use crate::global_def::global_define::RESOLUTION_720P;
 use bevy::asset::AssetServer;
-use bevy::audio::{PlaybackMode, Volume};
 use bevy::color::Color;
 use bevy::math::{Vec2, Vec3};
 use bevy::prelude::Val::Px;
 use bevy::prelude::*;
 use bevy::text::BreakLineOn;
+use bevy_kira_audio::prelude::*;
 
 use bevy::time::Timer;
 
 pub struct ScenePlayPlugin;
 
 #[derive(Resource)]
-struct ScrollViewResource {
-    value: f32,
-}
+struct InstanceHandle(Handle<AudioInstance>);
 
 impl Plugin for ScenePlayPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(ScrollViewResource { value: 0.0 })
-            .add_systems(Startup, spawn_entities)
-            .add_systems(Update, (update_typing_text,control_music_play));
+        app.add_systems(Startup, spawn_entities)
+            .add_plugins(AudioPlugin)
+            .add_systems(Update, (update_typing_text, control_music_play));
     }
 }
 
@@ -32,7 +30,7 @@ pub struct TypingText {
     pub(crate) timer: Timer,
 }
 
-#[derive(Component,Clone)]
+#[derive(Component, Clone)]
 pub struct AudioPlayControl;
 
 fn string_auto_split(value: impl Into<String>, len_px: f32, font_size: usize) -> String {
@@ -56,35 +54,44 @@ fn string_auto_split(value: impl Into<String>, len_px: f32, font_size: usize) ->
     result
 }
 
-fn control_music_play(mut playback_query: Query<&AudioSink>,
-                      mut text_query: Query<&mut Text>,
-                      mut button_query: Query<(&Interaction,&Children),(Changed<Interaction>,With<AudioPlayControl>)>) {
-    for (button,children) in button_query.iter_mut() {
+fn control_music_play(
+    mut audio_instances: ResMut<Assets<AudioInstance>>,
+    handle: Res<InstanceHandle>,
+    mut text_query: Query<&mut Text>,
+    mut button_query: Query<
+        (&Interaction, &Children),
+        (Changed<Interaction>, With<AudioPlayControl>),
+    >,
+) {
+    for (button, children) in button_query.iter_mut() {
         match button {
-            Interaction::Pressed =>{
+            Interaction::Pressed => {
                 println!("audio ctl button is pressed");
-                for sink in playback_query.iter_mut() {
-                    if sink.is_paused(){
-                        sink.toggle();
-                        // 改变按钮上的文本
-                        for &child in children.iter() {
-                            if let Ok(mut text) = text_query.get_mut(child) {
-                                text.sections[0].value = "AudioPlay".to_string(); // 修改文本
+                if let Some(instance) = audio_instances.get_mut(&handle.0) {
+                    match instance.state() {
+                        PlaybackState::Playing {..} => {
+                            instance.pause(AudioTween::default());
+                            for &child in children.iter() {
+                                if let Ok(mut text) = text_query.get_mut(child) {
+                                    text.sections[0].value = "StopPlay".to_string();
+                                    // 修改文本
+                                }
                             }
                         }
-                    }
-                    else{
-                        sink.toggle();
-                        // 改变按钮上的文本
-                        for &child in children.iter() {
-                            if let Ok(mut text) = text_query.get_mut(child) {
-                                text.sections[0].value = "StopPlay".to_string(); // 修改文本
+                        PlaybackState::Paused {..} => {
+                            instance.resume(AudioTween::default());
+                            for &child in children.iter() {
+                                if let Ok(mut text) = text_query.get_mut(child) {
+                                    text.sections[0].value = "AudioPlay".to_string();
+                                    // 修改文本
+                                }
                             }
                         }
+                        _ => {}
                     }
                 }
             }
-            _=>{return;}
+            _ => {}
         }
     }
 }
@@ -118,7 +125,7 @@ fn update_typing_text(
         }
     }
 }
-fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
     let font = asset_server.load("fonts/zfft.ttf");
     let background_handle = asset_server.load("images/vrgoz.png");
     let character_handle = asset_server.load("images/character.png");
@@ -202,13 +209,19 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>) {
     // 加载音频文件
     let music = asset_server.load("music/bgmusic1.ogg");
 
-    // 播放音频
-    commands.spawn(AudioBundle {
-        source: music,
-        settings: PlaybackSettings {
-            mode: PlaybackMode::Loop, // 循环播放
-            volume: Volume::new(0.3), // 音量设置为 50%
-            ..default()
-        },
-    });
+    let handle = audio.play(music).looped().handle();
+    commands.insert_resource(InstanceHandle(handle));
+
+    // commands.spawn(AudioBundle {
+    //     source: music,
+    //     settings: PlaybackSettings {
+    //         mode: PlaybackMode::Loop, // 循环播放
+    //         volume: Volume::new(0.3), // 音量设置为 50%
+    //         ..default()
+    //     },
+    // });
+}
+
+fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
+    audio.play(asset_server.load("music/bgmusic1.ogg")).looped();
 }
