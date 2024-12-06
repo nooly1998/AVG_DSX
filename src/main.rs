@@ -2,6 +2,7 @@
 mod global_def;
 mod utils;
 mod plugins;
+mod core;
 
 use crate::global_def::global_define::RESOLUTION_720P;
 use crate::plugins::scene_play::{AudioPlayControl, ScenePlayPlugin};

@@ -7,6 +7,7 @@ use bevy::prelude::*;
 use bevy::text::BreakLineOn;
 use bevy_kira_audio::prelude::*;
 
+use crate::utils::string_utils::string_auto_split;
 use bevy::time::Timer;
 
 pub struct ScenePlayPlugin;
@@ -15,13 +16,6 @@ pub struct ScenePlayPlugin;
 #[derive(Resource)]
 struct InstanceHandle(Handle<AudioInstance>);
 
-impl Plugin for ScenePlayPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_entities)
-            .add_plugins(AudioPlugin)
-            .add_systems(Update, (update_typing_text, control_music_play));
-    }
-}
 
 
 /// Represents a text component with typing effect.
@@ -39,42 +33,48 @@ pub struct TypingText {
     pub(crate) timer: Timer,
 }
 
-#[derive(Component, Clone)]
+#[derive(Component)]
 pub struct AudioPlayControl;
 
+#[derive(Component)]
+pub struct BackgroundImage;
 
-/// Splits a string into lines based on pixel width and font size.
-///
-/// # Parameters
-/// - `value`: The string to split. Can be any type that converts into a `String`.
-/// - `len_px`: The maximum line length in pixels.
-/// - `font_size`: The size of the font used to measure character width.
-///
-/// # Returns
-/// A `String` with newline characters embedded to split the input into lines of specified pixel length.
-///
-/// The function attempts to place newline characters such that no line exceeds
-/// the length in pixels defined by `len_px`, assuming each character is roughly
-/// `font_size` wide.
-fn string_auto_split(value: impl Into<String>, len_px: f32, font_size: usize) -> String {
-    let len = (len_px * 1000.0) as usize / font_size / 1000;
-    let val = value.into();
-    let vals = val.split(",").collect::<Vec<&str>>();
-    let mut result = String::new();
+impl Plugin for ScenePlayPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_entities)
+            .add_plugins(AudioPlugin)
+            .add_systems(Update, (update_typing_text, control_music_play));
+    }
+}
 
-    for item in vals.iter() {
-        let mut current_length = 0;
-        for c in item.chars() {
-            if current_length == len {
-                result.push('\n');
-                current_length = 0;
-            }
-            result.push(c);
-            current_length += 1;
+pub fn update_typing_text(
+    time: Res<Time>,
+    input: Res<ButtonInput<MouseButton>>,
+    mut query: Query<(&mut TypingText, &mut Text)>,
+) {
+    for (mut typing_text, mut text) in query.iter_mut() {
+        if input.just_pressed(MouseButton::Left)
+            && typing_text.current_index < typing_text.full_text.len()
+        {
+            typing_text.displayed_text = typing_text.full_text.clone();
+            typing_text.current_index = typing_text.full_text.len();
+
+            text.sections[0].value = typing_text.displayed_text.clone();
+            return;
+        }
+
+        typing_text.timer.tick(time.delta());
+        if typing_text.timer.finished() && typing_text.current_index < typing_text.full_text.len() {
+            let clone_text = typing_text.clone();
+            let Some(update_text) = clone_text.full_text.chars().nth(clone_text.current_index)
+            else {
+                break;
+            };
+            typing_text.displayed_text.push(update_text);
+            typing_text.current_index += 1;
+            text.sections[0].value = typing_text.displayed_text.clone();
         }
     }
-
-    result
 }
 
 fn control_music_play(
@@ -119,38 +119,9 @@ fn control_music_play(
     }
 }
 
-fn update_typing_text(
-    time: Res<Time>,
-    input: Res<ButtonInput<MouseButton>>,
-    mut query: Query<(&mut TypingText, &mut Text)>,
-) {
-    for (mut typing_text, mut text) in query.iter_mut() {
-        if input.just_pressed(MouseButton::Left)
-            && typing_text.current_index < typing_text.full_text.len()
-        {
-            typing_text.displayed_text = typing_text.full_text.clone();
-            typing_text.current_index = typing_text.full_text.len();
-
-            text.sections[0].value = typing_text.displayed_text.clone();
-            return;
-        }
-
-        typing_text.timer.tick(time.delta());
-        if typing_text.timer.finished() && typing_text.current_index < typing_text.full_text.len() {
-            let clone_text = typing_text.clone();
-            let Some(update_text) = clone_text.full_text.chars().nth(clone_text.current_index)
-            else {
-                break;
-            };
-            typing_text.displayed_text.push(update_text);
-            typing_text.current_index += 1;
-            text.sections[0].value = typing_text.displayed_text.clone();
-        }
-    }
-}
 fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
     let font = asset_server.load("fonts/zfft.ttf");
-    let background_handle = asset_server.load("images/vrgoz.png");
+    let background_handle = asset_server.load("images/bg1_resized.png");
     let character_handle = asset_server.load("images/character.png");
 
     commands.spawn(Camera2dBundle::default());
