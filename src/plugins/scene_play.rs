@@ -122,7 +122,7 @@ fn control_music_play(
 fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
     let font = asset_server.load("fonts/zfft.ttf");
     let background_handle = asset_server.load("images/bg1_resized.png");
-    let character_handle = asset_server.load("images/character.png");
+    let character_handle = asset_server.load("images/ch4.png");
 
     commands.spawn(Camera2dBundle::default());
 

@@ -27,6 +27,7 @@ fn main() {
             ..Default::default()
         }))
         .add_systems(Startup, setup)
+        .insert_resource(Msaa::Sample4) // 启用抗锯齿， 4xMSAA
         .add_plugins((ScrollViewPlugin,ScenePlayPlugin))
         .run();
 }
