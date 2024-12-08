@@ -7,16 +7,29 @@ use bevy::prelude::*;
 use bevy::text::BreakLineOn;
 use bevy_kira_audio::prelude::*;
 
+use crate::core::event_bus::*;
 use crate::utils::string_utils::string_auto_split;
 use bevy::time::Timer;
 
 pub struct ScenePlayPlugin;
 
+#[derive(Clone)]
+struct ScenePlayStage {
+    id: u32,
+    background_path: &'static str,
+    character_path: &'static str,
+    music_path: &'static str,
+}
+
 /// A resource that holds a handle to an audio instance for controlling playback.
 #[derive(Resource)]
-struct InstanceHandle(Handle<AudioInstance>);
+struct BgmHandle(Handle<AudioInstance>);
 
+#[derive(Resource)]
+struct BgImageHandle(Handle<Image>);
 
+// #[derive(Resource)]
+// struct CharacterHandle(Handle<Image>);
 
 /// Represents a text component with typing effect.
 ///
@@ -34,16 +47,58 @@ pub struct TypingText {
 }
 
 #[derive(Component)]
+struct CharacterComponent {
+    path: &'static str,
+}
+
+#[derive(Component)]
+pub struct BackgroundComponent {
+    path: &'static str,
+}
+
+#[derive(Component)]
 pub struct AudioPlayControl;
 
 #[derive(Component)]
-pub struct BackgroundImage;
+pub struct BackgroundControl;
+
+#[derive(Component)]
+pub struct CharacterControl;
 
 impl Plugin for ScenePlayPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_entities)
+            .init_resource::<Events<GenericEvent<ScenePlayStage>>>()
             .add_plugins(AudioPlugin)
-            .add_systems(Update, (update_typing_text, control_music_play));
+            .add_systems(
+                Update,
+                (
+                    update_typing_text,
+                    control_music_play,
+                    control_character_play,
+                    control_background_play,
+                    event_sender_system,
+                    event_receiver_system,
+                ),
+            );
+    }
+}
+
+fn event_sender_system(
+    mut event_writer: EventWriter<GenericEvent<ScenePlayStage>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Enter) {
+        let scene_event = GenericEvent {
+            data: ScenePlayStage {
+                id: 1,
+                background_path: "images/bg2_resized.png",
+                character_path: "images/ch5.png",
+                music_path: "images/music1.mp3",
+            },
+        };
+        event_writer.send(scene_event);
+        println!("GenericEvent<ScenePlayStage> sent!");
     }
 }
 
@@ -77,9 +132,36 @@ pub fn update_typing_text(
     }
 }
 
+fn event_receiver_system(
+    asset_server: Res<AssetServer>,
+    mut event_reader: EventReader<GenericEvent<ScenePlayStage>>,
+    mut background_query: Query<(
+        &mut Handle<Image>,
+        Option<&mut BackgroundComponent>,
+        Option<&mut CharacterComponent>,
+    )>,
+    /*mut character_query: Query<(&mut Handle<Image>, &mut CharacterComponent)>,*/
+) {
+    for (event, _) in event_reader.par_read() {
+        for (mut handle, mut background, mut character) in &mut background_query.iter_mut() {
+            if background.is_some() {
+                let path = event.data.background_path;
+                // background.unwrap().path = path.clone();
+                *handle = asset_server.load(path);
+            }
+            if character.is_some() {
+                let path = event.data.character_path;
+                // character.unwrap().path = path.clone();
+                *handle = asset_server.load(path);
+            }
+            {}
+        }
+    }
+}
+
 fn control_music_play(
     mut audio_instances: ResMut<Assets<AudioInstance>>,
-    handle: Res<InstanceHandle>,
+    handle: Res<BgmHandle>,
     mut text_query: Query<&mut Text>,
     mut button_query: Query<
         (&Interaction, &Children),
@@ -92,7 +174,7 @@ fn control_music_play(
                 println!("audio ctl button is pressed");
                 if let Some(instance) = audio_instances.get_mut(&handle.0) {
                     match instance.state() {
-                        PlaybackState::Playing {..} => {
+                        PlaybackState::Playing { .. } => {
                             instance.pause(AudioTween::default());
                             for &child in children.iter() {
                                 if let Ok(mut text) = text_query.get_mut(child) {
@@ -101,7 +183,7 @@ fn control_music_play(
                                 }
                             }
                         }
-                        PlaybackState::Paused {..} => {
+                        PlaybackState::Paused { .. } => {
                             instance.resume(AudioTween::default());
                             for &child in children.iter() {
                                 if let Ok(mut text) = text_query.get_mut(child) {
@@ -119,27 +201,85 @@ fn control_music_play(
     }
 }
 
+fn control_background_play(
+    asset_server: Res<AssetServer>,
+    mut entity_query: Query<(&mut Handle<Image>, &BackgroundComponent)>,
+    mut button_query: Query<
+        (&Interaction, &Children),
+        (Changed<Interaction>, With<BackgroundControl>),
+    >,
+) {
+    for (interaction, _) in button_query.iter_mut() {
+        match interaction {
+            Interaction::Pressed => {
+                println!("background pressed button");
+                for (mut handle, background) in &mut entity_query.iter_mut() {
+                    let path = background.path;
+                    *handle = asset_server.load(path);
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
+fn control_character_play(
+    asset_server: Res<AssetServer>,
+    mut entity_query: Query<(&mut Handle<Image>, &CharacterComponent)>,
+    mut button_query: Query<
+        (&Interaction, &Children),
+        (Changed<Interaction>, With<CharacterControl>),
+    >,
+) {
+    for (interaction, _) in button_query.iter_mut() {
+        match interaction {
+            Interaction::Pressed => {
+                println!("character pressed button");
+                for (mut handle, character) in &mut entity_query.iter_mut() {
+                    let path = character.path;
+                    *handle = asset_server.load(path);
+                }
+            }
+            Interaction::Hovered => {}
+            Interaction::None => {}
+        }
+    }
+}
+
 fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
     let font = asset_server.load("fonts/zfft.ttf");
-    let background_handle = asset_server.load("images/bg1_resized.png");
-    let character_handle = asset_server.load("images/ch4.png");
+    let background_handle = asset_server.load("images/bg2_resized.png");
+    let character_handle = asset_server.load("images/ch5.png");
 
     commands.spawn(Camera2dBundle::default());
 
-    commands.spawn(SpriteBundle {
-        texture: background_handle,
-        transform: Transform {
-            translation: Vec3::new(0.0, 0.0, 0.0), // Position it at the center
+    commands
+        .spawn(SpriteBundle {
+            texture: background_handle,
+            transform: Transform {
+                translation: Vec3::new(0.0, 0.0, 0.0), // Position it at the center
+                ..Default::default()
+            },
             ..Default::default()
-        },
-        ..Default::default()
-    });
+        })
+        .insert(BackgroundComponent {
+            path: "images/bg1_resized.png",
+        });
 
-    commands.spawn(SpriteBundle {
-        texture: character_handle,
-        transform: Transform::from_translation(Vec3::new(-(RESOLUTION_720P.0 / 4f32), 0.0, 1.0)),
-        ..Default::default()
-    });
+    commands
+        .spawn(SpriteBundle {
+            texture: character_handle,
+            transform: Transform::from_translation(Vec3::new(
+                -(RESOLUTION_720P.0 / 4f32),
+                0.0,
+                1.0,
+            )),
+            ..Default::default()
+        })
+        .insert(CharacterComponent {
+            path: "images/ch4.png",
+        });
 
     let slightly_smaller_text_style = TextStyle {
         font,
@@ -204,5 +344,5 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio:
     let music = asset_server.load("music/bgmusic1.ogg");
 
     let handle = audio.play(music).looped().handle();
-    commands.insert_resource(InstanceHandle(handle));
+    commands.insert_resource(BgmHandle(handle));
 }

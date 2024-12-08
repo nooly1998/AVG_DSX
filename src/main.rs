@@ -5,7 +5,7 @@ mod plugins;
 mod core;
 
 use crate::global_def::global_define::RESOLUTION_720P;
-use crate::plugins::scene_play::{AudioPlayControl, ScenePlayPlugin};
+use crate::plugins::scene_play::{AudioPlayControl, BackgroundControl, CharacterControl, ScenePlayPlugin};
 use crate::plugins::scroll_view::{ScrollViewPlugin, TextFiledHiddenButton};
 use bevy::{
     prelude::*
@@ -117,6 +117,77 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     button_bundle.spawn(
                         (TextBundle::from_section(
                             "AudioPlay",
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 18.0,
+                                color: Color::srgb(0.9, 0.9, 0.9),
+                            },
+                        )),
+                    );
+                });
+
+            button_list
+                .spawn((
+                    ButtonBundle {
+                        style: {
+                            Style {
+                                width: Px(150.0),
+                                height: Px(30.0),
+                                border: UiRect::all(Px(5.0)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            }
+                        },
+                        interaction: Interaction::None,
+                        border_color: BorderColor(Color::BLACK),
+                        border_radius: BorderRadius::MAX,
+                        background_color: Color::srgb(0.15, 0.15, 0.15).into(),
+                        ..default()
+                    },
+                    Name::new("ChangeCharacter"),CharacterControl
+                ))
+                .with_children(|button_bundle| {
+                    button_bundle.spawn(
+                        (TextBundle::from_section(
+                            "ChangeCharacter",
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 18.0,
+                                color: Color::srgb(0.9, 0.9, 0.9),
+                            },
+                        )),
+                    );
+                });
+            button_list
+                .spawn((
+                    ButtonBundle {
+                        style: {
+                            Style {
+                                width: Px(150.0),
+                                height: Px(30.0),
+                                border: UiRect::all(Px(5.0)),
+                                // horizontally center child text
+                                justify_content: JustifyContent::Center,
+                                // vertically center child text
+                                align_items: AlignItems::Center,
+                                ..default()
+                            }
+                        },
+                        interaction: Interaction::None,
+                        border_color: BorderColor(Color::BLACK),
+                        border_radius: BorderRadius::MAX,
+                        background_color: Color::srgb(0.15, 0.15, 0.15).into(),
+                        ..default()
+                    },
+                    Name::new("ChangeBackGround"),BackgroundControl
+                ))
+                .with_children(|button_bundle| {
+                    button_bundle.spawn(
+                        (TextBundle::from_section(
+                            "ChangeBackGround",
                             TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                 font_size: 18.0,
