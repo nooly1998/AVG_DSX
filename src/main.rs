@@ -1,20 +1,14 @@
-
-mod global_def;
-mod utils;
-mod plugins;
 mod core;
+mod global_def;
+mod plugins;
+mod utils;
 
-use crate::global_def::global_define::RESOLUTION_720P;
-use crate::plugins::scene_play::{AudioPlayControl, BackgroundControl, CharacterControl, ScenePlayPlugin};
-use crate::plugins::scroll_view::{ScrollViewPlugin, TextFiledHiddenButton};
-use bevy::{
-    prelude::*
-
-    ,
-    ui::*,
-    window::WindowResolution
-};
+use crate::global_def::global_define::*;
+use crate::plugins::config::*;
+use crate::plugins::scene_play::*;
+use crate::plugins::scroll_view::*;
 use bevy::prelude::Val::Px;
+use bevy::{prelude::*, ui::*, window::WindowResolution};
 
 fn main() {
     App::new()
@@ -28,7 +22,7 @@ fn main() {
         }))
         .add_systems(Startup, setup)
         .insert_resource(Msaa::Sample4) // 启用抗锯齿， 4xMSAA
-        .add_plugins((ScrollViewPlugin,ScenePlayPlugin))
+        .add_plugins((ScrollViewPlugin, ScenePlayPlugin, ConfigPlugin))
         .run();
 }
 
@@ -111,7 +105,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         background_color: Color::srgb(0.15, 0.15, 0.15).into(),
                         ..default()
                     },
-                    Name::new("TextFiledHidden"),AudioPlayControl
+                    Name::new("TextFiledHidden"),
+                    AudioPlayControl,
                 ))
                 .with_children(|button_bundle| {
                     button_bundle.spawn(
@@ -147,7 +142,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         background_color: Color::srgb(0.15, 0.15, 0.15).into(),
                         ..default()
                     },
-                    Name::new("ChangeCharacter"),CharacterControl
+                    Name::new("ChangeCharacter"),
+                    CharacterControl,
                 ))
                 .with_children(|button_bundle| {
                     button_bundle.spawn(
@@ -182,7 +178,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         background_color: Color::srgb(0.15, 0.15, 0.15).into(),
                         ..default()
                     },
-                    Name::new("ChangeBackGround"),BackgroundControl
+                    Name::new("ChangeBackGround"),
+                    BackgroundControl,
                 ))
                 .with_children(|button_bundle| {
                     button_bundle.spawn(
@@ -198,7 +195,3 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 });
         });
 }
-
-
-
-
