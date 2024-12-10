@@ -8,8 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="68cae6fb-f4a4-44b2-8883-220125c2aa3e" name="更改" comment="Add and modify IntelliJ IDEA project configuration files&#10;&#10;Deleted the .idea/.gitignore file and introduced new XML configuration files for IntelliJ IDEA, including AVG_DSX.iml and workspace.xml. These changes ensure proper configuration and project setup within the IDE, aligning with the project structure and settings.">
-      <change afterPath="$PROJECT_DIR$/assets/component/dropdownctl.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/config.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/config.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/AVG_DSX.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,24 +34,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Cargo.Run AVG_DSX.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.rust.reset.selective.auto.import": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/RustroverProjects/AVG_DSX/assets/component",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "org.rust.first.attach.projects": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Cargo.Run AVG_DSX.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/RustroverProjects/AVG_DSX/assets/component&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\RustroverProjects\AVG_DSX\assets\component" />
@@ -134,6 +136,6 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Remove .idea/.gitignore and modify modules.xml.&#10;&#10;The .gitignore file under the .idea directory was deleted to ensure it does not interfere with version control settings. A minor change was also made to the modules.xml file to add a newline at the end of the project tag, improving code consistency." />
     <MESSAGE value="Add and modify IntelliJ IDEA project configuration files&#10;&#10;Deleted the .idea/.gitignore file and introduced new XML configuration files for IntelliJ IDEA, including AVG_DSX.iml and workspace.xml. These changes ensure proper configuration and project setup within the IDE, aligning with the project structure and settings." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add and modify IntelliJ IDEA project configuration files&#10;&#10;Deleted the .idea/.gitignore file and introduced new XML configuration files for IntelliJ IDEA, including AVG_DSX.iml and workspace.xml. These changes ensure proper configuration and project setup within the IDE, aligning with the project structure and settings." />
+    <option name="LAST_COMMIT_MESSAGE" value="" />
   </component>
 </project>
