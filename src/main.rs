@@ -9,6 +9,7 @@ use crate::plugins::scene_play::*;
 use crate::plugins::scroll_view::*;
 use bevy::prelude::Val::Px;
 use bevy::{prelude::*, ui::*, window::WindowResolution};
+use crate::plugins::drop_down::DropDownPlugin;
 
 fn main() {
     App::new()
@@ -22,7 +23,7 @@ fn main() {
         }))
         .add_systems(Startup, setup)
         .insert_resource(Msaa::Sample4) // 启用抗锯齿， 4xMSAA
-        .add_plugins((ScrollViewPlugin, ScenePlayPlugin, ConfigPlugin))
+        .add_plugins((ScrollViewPlugin, ScenePlayPlugin, ConfigPlugin, DropDownPlugin))
         .run();
 }
 
