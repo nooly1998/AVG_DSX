@@ -1,10 +1,14 @@
 use bevy::prelude::*;
-use bevy::ui::Val::Px;
+use bevy::reflect::List;
+use bevy::ui::Val::{Percent, Px};
 
 pub struct DropDownPlugin;
 
 #[derive(Component)]
 struct ListVisibility(bool); // 用于控制列表可见性的组件
+
+#[derive(Component)]
+struct ListShowText; // 用于控制列表可见性的组件
 
 #[derive(Component)]
 struct ItemVisibility(bool); // 用于控制列表可见性的组件
@@ -23,7 +27,15 @@ impl Plugin for DropDownPlugin {
             ..default()
         })
         .add_systems(Startup, spawn_entities)
-        .add_systems(Update, (button_system, toggle_list_visibility));
+        .add_systems(
+            Update,
+            (
+                button_system,
+                toggle_list_visibility,
+                clicked_list_item,
+                list_item_hidden_update,
+            ),
+        );
     }
 }
 
@@ -42,24 +54,64 @@ fn button_system(
     }
 }
 
+fn clicked_list_item(
+    mut option: ResMut<DropDownOptions>,
+    mut button_query: Query<(&Interaction, &mut Children, &mut ItemVisibility)>,
+    mut list_query: Query<&mut ListVisibility>,
+    mut text_query: Query<&mut Text>,
+) {
+    let mut text = String::new();
+    for (interaction, button_child, _) in button_query.iter_mut() {
+        if *interaction == Interaction::Pressed {
+            for entity in &button_child {
+                if let Ok(child_text) = text_query.get(*entity) {
+                    text = child_text.sections[0].value.clone();
+                    option.selected_option = text.clone();
+                    for mut list_visibility in list_query.iter_mut() {
+                        list_visibility.0 = false;
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn list_item_hidden_update(
+    option: Res<DropDownOptions>,
+    mut visibility_query: Query<(&mut Visibility), With<ItemVisibility>>,
+    list_query: Query<&ListVisibility>,
+    mut text_query: Query<&mut Text,With<ListShowText>>,
+) {
+    for mut visibility in visibility_query.iter_mut() {
+        for list in list_query.iter() {
+            //update list visibility
+            if !list.0 {
+                *visibility = Visibility::Hidden;
+                //update list top text
+                for mut list_text in text_query.iter_mut() {
+                    list_text.sections[0].value = option.selected_option.clone();
+                }
+
+            } else {
+                *visibility = Visibility::Inherited;
+            }
+        }
+    }
+}
+
 fn toggle_list_visibility(
     mut interaction_query: Query<
         (&Interaction, &mut ListVisibility),
         (Changed<Interaction>, With<Button>),
     >,
-    mut visibility_query: Query<(&mut ItemVisibility, &mut Visibility)>,
+    mut visibility_query: Query<(&mut ItemVisibility)>,
 ) {
     for (interaction, mut list_visibility) in interaction_query.iter_mut() {
         if *interaction == Interaction::Pressed {
             list_visibility.0 = !list_visibility.0; // 切换可见性状态
 
-            for (mut item, mut visibility) in visibility_query.iter_mut() {
+            for mut item in visibility_query.iter_mut() {
                 item.0 = list_visibility.0; // 更新子节点的可见性
-                if item.0 {
-                    *visibility = Visibility::Inherited;
-                } else {
-                    *visibility = Visibility::Hidden;
-                }
             }
         }
     }
@@ -78,7 +130,6 @@ fn spawn_entities(
                 width: Px(150.0),
                 display: Display::Grid,
                 height: Px(30.0),
-                margin: UiRect::all(Val::Px(5.0)),
                 ..default()
             },
             background_color: BackgroundColor::from(Color::srgb(0.15, 0.15, 0.15)),
@@ -102,10 +153,9 @@ fn spawn_entities(
                         .spawn(ButtonBundle {
                             style: {
                                 Style {
-                                    left: Px(150.0 - 30.0),
-                                    width: Px(30.0),
-                                    height: Px(30.0),
-                                    border: UiRect::all(Px(5.0)),
+                                    width: Percent(100.0),
+                                    height: Percent(100.0),
+                                    // border: UiRect::all(Px(5.0)),
                                     // horizontally center child text
                                     justify_content: JustifyContent::Center,
                                     // vertically center child text
@@ -113,12 +163,49 @@ fn spawn_entities(
                                     ..default()
                                 }
                             },
-                            image: UiImage::new(button_image),
+                            // image: UiImage::new(button_image),
                             interaction: Interaction::None,
                             background_color: Color::srgb(0.15, 0.15, 0.15).into(),
                             ..default()
                         })
-                        .insert(ListVisibility(true));
+                        .insert(ListVisibility(true))
+                        .with_children(|ctl| {
+                            ctl.spawn(NodeBundle {
+                                style: Style {
+                                    display: Display::Flex,
+                                    width: Percent(100.0),
+                                    height: Percent(100.0),
+                                    ..default()
+                                },
+                                ..default()
+                            })
+                            .with_children(|btn| {
+                                btn.spawn(TextBundle {
+                                    text: Text::from_section(
+                                        String::new(),
+                                        TextStyle {
+                                            font: font.clone(),
+                                            font_size: 24.0,
+                                            color: Color::WHITE,
+                                        },
+                                    ),
+                                    style: Style {
+                                        width: Percent(80.0),
+                                        ..default()
+                                    },
+                                    ..default()
+                                }).insert(ListShowText);
+
+                                btn.spawn(ImageBundle {
+                                    style: Style {
+                                        width: Percent(20.0),
+                                        ..default()
+                                    },
+                                    image: UiImage::new(button_image),
+                                    ..default()
+                                });
+                            });
+                        });
                 });
 
             for option in options {
