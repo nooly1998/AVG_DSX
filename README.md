@@ -2,6 +2,13 @@
 
 This is an ongoing text adventure game building framework based on Bevy 0.14.2. The following are the features currently implemented:
 
+## Build
+```
+git clone https://github.com/nooly1998/AVG_DSX.git
+cd AVG_DSX
+cargo build --release
+```
+
 ## Implemented Features
 
 - **Text Update**: The text in the game can be dynamically updated, providing an immersive text interaction experience.
