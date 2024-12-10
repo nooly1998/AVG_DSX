@@ -1,14 +1,18 @@
-# AVG 游戏开发
+# AVG_DSX
 
-这是一个正在开发的基于 Bevy 0.14.2 的文字冒险游戏。以下是目前实现的功能：
+This is an ongoing text adventure game building framework based on Bevy 0.14.2. The following are the features currently implemented:
 
-## 已实现功能
+## Implemented Features
 
-- **文字更新**：游戏中的文本能够动态更新，提供沉浸式的文字互动体验。
-- **滚动视图**：实现了滚动视图，适用于长文本场景的呈现。
+- **Text Update**: The text in the game can be dynamically updated, providing an immersive text interaction experience.
+- **Background Update**: The Background in the game can be dynamically updated.
+- **Character Update**: The Character in the game can be dynamically updated.
+- **Scrolling View**: A scrolling view has been implemented, suitable for presenting long text scenarios.
 
-## 使用技术
+## dependencies
 
-- **Bevy 0.14.2**：游戏开发中使用的主要引擎。
+- **bevy**
+- **bevy_kira_audio**
+- **image**
 
-如果需要更多帮助或有任何问题，请随时告知！
+If you have any questions, please create an issue or email abri5mhwei@gmail.com
