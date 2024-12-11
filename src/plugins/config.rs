@@ -1,7 +1,9 @@
 use crate::plugins::drop_down::*;
+use crate::plugins::processor_bar::{ProgressBarPlugin};
 use bevy::a11y::accesskit::Size;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
+use crate::plugins::check_box::CheckboxPlugin;
 
 pub struct ConfigPlugin;
 
@@ -18,9 +20,13 @@ impl Plugin for ConfigPlugin {
                     ..default()
                 },
                 ..default()
-            });
+            })
+            .add_plugins(ProgressBarPlugin)
+            .add_plugins(CheckboxPlugin);
         // .add_systems(Update, );
     }
 }
 
-fn spawn_entities(commands: Commands, _asset_server: ResMut<AssetServer>) {}
+fn spawn_entities(mut commands: Commands, _asset_server: ResMut<AssetServer>) {
+
+}
