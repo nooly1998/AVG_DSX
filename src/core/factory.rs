@@ -1,11 +1,9 @@
-
 pub mod image_factory {
-    use std::{env, fs};
     use crate::utils::image_utils::is_supported_image_format;
+    use std::{env, fs};
 
     /// 获取目录下所有图片文件的文件名
     pub fn get_image_filenames() -> Result<Vec<String>, Box<dyn std::error::Error>> {
-
         let dir_path = env::current_dir()?.join("assets/images");
         let mut filenames = Vec::new();
 

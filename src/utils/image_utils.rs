@@ -1,8 +1,12 @@
-use std::path::Path;
-use image::ImageFormat;
 use image::imageops::FilterType;
+use image::ImageFormat;
+use std::path::Path;
 
-pub fn resize_image(input_path: &str, width: u32, height: u32) -> Result<(), Box<dyn std::error::Error>> {
+pub fn resize_image(
+    input_path: &str,
+    width: u32,
+    height: u32,
+) -> Result<(), Box<dyn std::error::Error>> {
     // 加载图片
     let img = image::open(&Path::new(input_path))?;
 
@@ -24,7 +28,13 @@ pub fn resize_image(input_path: &str, width: u32, height: u32) -> Result<(), Box
     };
 
     // 构建输出文件路径
-    let output_path = format!("{}_resized.{}", input_path.trim_end_matches(&extension).trim_end_matches('.'), extension);
+    let output_path = format!(
+        "{}_resized.{}",
+        input_path
+            .trim_end_matches(&extension)
+            .trim_end_matches('.'),
+        extension
+    );
 
     // 调整大小
     let resized = img.resize(width, height, FilterType::Nearest);
@@ -37,7 +47,8 @@ pub fn resize_image(input_path: &str, width: u32, height: u32) -> Result<(), Box
 
 pub fn is_supported_image_format(ext: &std::ffi::OsStr) -> bool {
     match ext.to_str() {
-        Some("png") | Some("jpg") | Some("jpeg") | Some("bmp") | Some("gif") | Some("tiff") | Some("webp") => true,
+        Some("png") | Some("jpg") | Some("jpeg") | Some("bmp") | Some("gif") | Some("tiff")
+        | Some("webp") => true,
         _ => false,
     }
 }

@@ -1,5 +1,3 @@
-
-
 /// Splits a string into lines based on pixel width and font size.
 ///
 /// # Parameters

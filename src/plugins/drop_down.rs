@@ -2,7 +2,11 @@ use bevy::prelude::*;
 use bevy::reflect::List;
 use bevy::ui::Val::{Percent, Px};
 
-pub struct DropDownPlugin;
+#[derive(Default)]
+pub struct DropDownPlugin {
+    pub(crate) options: DropDownOptions,
+    pub(crate) style: Style,
+}
 
 #[derive(Component)]
 struct ListVisibility(bool); // 用于控制列表可见性的组件
@@ -13,29 +17,47 @@ struct ListShowText; // 用于控制列表可见性的组件
 #[derive(Component)]
 struct ItemVisibility(bool); // 用于控制列表可见性的组件
 
-#[derive(Resource, Reflect, Default)]
-struct DropDownOptions {
-    options: Vec<String>,
-    selected_index: usize,
-    selected_option: String,
+#[derive(Resource, Reflect, Clone, Default)]
+pub struct DropDownOptions {
+    pub(crate) options: Vec<String>,
+    pub(crate) selected_index: usize,
+    pub(crate) selected_option: String,
+}
+
+impl DropDownOptions {
+    fn from_option(options: Vec<String>, option: String) -> Self {
+        let mut index = 0;
+        let mut sel_option = String::new();
+        for (n, item) in options.clone().iter().enumerate() {
+            let Some(val) = item.downcast_ref::<String>() else {
+                continue;
+            };
+            if *val == option {
+                index = n;
+                sel_option = option.clone();
+            }
+        }
+        Self {
+            options,
+            selected_index: index,
+            selected_option: sel_option,
+        }
+    }
 }
 
 impl Plugin for DropDownPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(DropDownOptions {
-            options: vec!["720p".to_string(), "1080p".to_string(), "1440p".to_string()],
-            ..default()
-        })
-        .add_systems(Startup, spawn_entities)
-        .add_systems(
-            Update,
-            (
-                button_system,
-                toggle_list_visibility,
-                clicked_list_item,
-                list_item_hidden_update,
-            ),
-        );
+        app.insert_resource(self.options.clone())
+            .add_systems(Startup, spawn_entities)
+            .add_systems(
+                Update,
+                (
+                    button_system,
+                    toggle_list_visibility,
+                    clicked_list_item,
+                    list_item_hidden_update,
+                ),
+            );
     }
 }
 
@@ -58,14 +80,13 @@ fn clicked_list_item(
     mut option: ResMut<DropDownOptions>,
     mut button_query: Query<(&Interaction, &mut Children, &mut ItemVisibility)>,
     mut list_query: Query<&mut ListVisibility>,
-    mut text_query: Query<&mut Text>,
+    text_query: Query<&mut Text>,
 ) {
-    let mut text = String::new();
     for (interaction, button_child, _) in button_query.iter_mut() {
         if *interaction == Interaction::Pressed {
             for entity in &button_child {
                 if let Ok(child_text) = text_query.get(*entity) {
-                    text = child_text.sections[0].value.clone();
+                    let text = child_text.sections[0].value.clone();
                     let options = option.options.clone();
                     option.selected_option = text.clone();
                     for (n, str) in options.iter().enumerate() {
@@ -86,7 +107,7 @@ fn clicked_list_item(
 
 fn list_item_hidden_update(
     option: Res<DropDownOptions>,
-    mut visibility_query: Query<(&mut Visibility), With<ItemVisibility>>,
+    mut visibility_query: Query<&mut Visibility, With<ItemVisibility>>,
     list_query: Query<&ListVisibility>,
     mut text_query: Query<&mut Text, With<ListShowText>>,
 ) {
@@ -111,7 +132,7 @@ fn toggle_list_visibility(
         (&Interaction, &mut ListVisibility),
         (Changed<Interaction>, With<Button>),
     >,
-    mut visibility_query: Query<(&mut ItemVisibility)>,
+    mut visibility_query: Query<&mut ItemVisibility>,
 ) {
     for (interaction, mut list_visibility) in interaction_query.iter_mut() {
         if *interaction == Interaction::Pressed {

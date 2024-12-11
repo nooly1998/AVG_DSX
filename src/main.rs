@@ -8,8 +8,7 @@ use crate::plugins::config::*;
 use crate::plugins::scene_play::*;
 use crate::plugins::scroll_view::*;
 use bevy::prelude::Val::Px;
-use bevy::{prelude::*, ui::*, window::WindowResolution};
-use crate::plugins::drop_down::DropDownPlugin;
+use bevy::{prelude::*, window::WindowResolution};
 
 fn main() {
     App::new()
@@ -23,7 +22,7 @@ fn main() {
         }))
         .add_systems(Startup, setup)
         .insert_resource(Msaa::Sample4) // 启用抗锯齿， 4xMSAA
-        .add_plugins((ScrollViewPlugin, ScenePlayPlugin, ConfigPlugin, DropDownPlugin))
+        .add_plugins((ScrollViewPlugin, ScenePlayPlugin, ConfigPlugin))
         .run();
 }
 
@@ -73,16 +72,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     TextFiledHiddenButton,
                 ))
                 .with_children(|button_bundle| {
-                    button_bundle.spawn(
-                        (TextBundle::from_section(
-                            "FiledHidden",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 18.0,
-                                color: Color::srgb(0.9, 0.9, 0.9),
-                            },
-                        )),
-                    );
+                    button_bundle.spawn(TextBundle::from_section(
+                        "FiledHidden",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 18.0,
+                            color: Color::srgb(0.9, 0.9, 0.9),
+                        },
+                    ));
                 });
 
             button_list
@@ -110,16 +107,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     AudioPlayControl,
                 ))
                 .with_children(|button_bundle| {
-                    button_bundle.spawn(
-                        (TextBundle::from_section(
-                            "AudioPlay",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 18.0,
-                                color: Color::srgb(0.9, 0.9, 0.9),
-                            },
-                        )),
-                    );
+                    button_bundle.spawn(TextBundle::from_section(
+                        "AudioPlay",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 18.0,
+                            color: Color::srgb(0.9, 0.9, 0.9),
+                        },
+                    ));
                 });
 
             button_list
@@ -147,16 +142,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     CharacterControl,
                 ))
                 .with_children(|button_bundle| {
-                    button_bundle.spawn(
-                        (TextBundle::from_section(
-                            "ChangeCharacter",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 18.0,
-                                color: Color::srgb(0.9, 0.9, 0.9),
-                            },
-                        )),
-                    );
+                    button_bundle.spawn(TextBundle::from_section(
+                        "ChangeCharacter",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 18.0,
+                            color: Color::srgb(0.9, 0.9, 0.9),
+                        },
+                    ));
                 });
             button_list
                 .spawn((
@@ -183,16 +176,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     BackgroundControl,
                 ))
                 .with_children(|button_bundle| {
-                    button_bundle.spawn(
-                        (TextBundle::from_section(
-                            "ChangeBackGround",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 18.0,
-                                color: Color::srgb(0.9, 0.9, 0.9),
-                            },
-                        )),
-                    );
+                    button_bundle.spawn(TextBundle::from_section(
+                        "ChangeBackGround",
+                        TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 18.0,
+                            color: Color::srgb(0.9, 0.9, 0.9),
+                        },
+                    ));
                 });
         });
 }

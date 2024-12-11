@@ -140,10 +140,9 @@ fn event_receiver_system(
         Option<&mut BackgroundComponent>,
         Option<&mut CharacterComponent>,
     )>,
-    /*mut character_query: Query<(&mut Handle<Image>, &mut CharacterComponent)>,*/
 ) {
     for (event, _) in event_reader.par_read() {
-        for (mut handle, mut background, mut character) in &mut background_query.iter_mut() {
+        for (mut handle, background, character) in &mut background_query.iter_mut() {
             if background.is_some() {
                 let path = event.data.background_path;
                 // background.unwrap().path = path.clone();
@@ -306,12 +305,10 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio:
         })
         .with_children(|builder| {
             builder
-                .spawn(
-                    (NodeBundle {
-                        style: Style { ..default() },
-                        ..default()
-                    }),
-                )
+                .spawn(NodeBundle {
+                    style: Style { ..default() },
+                    ..default()
+                })
                 .with_children(|button_bundle| {
                     button_bundle
                         .spawn(TextBundle {
