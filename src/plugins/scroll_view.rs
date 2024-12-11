@@ -240,8 +240,8 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 fn scroll_bar_drag_system(
     mut scroll_query: Query<(&mut Style, &mut ScrollView)>,
-    mut current_window: Query<&mut Window>,
-    mut mouse_button_input: ResMut<ButtonInput<MouseButton>>,
+    current_window: Query<&mut Window>,
+    mouse_button_input: ResMut<ButtonInput<MouseButton>>,
 ) {
     // println!("windows size:{:?}",current_window.iter().len());
     for (mut style, mut scroll_bar) in scroll_query.iter_mut() {
@@ -303,7 +303,7 @@ fn scroll_bar_drag_system(
 
 pub fn scroll_view_drag_system(mut scroll_query: Query<(&mut Style, &mut ScrollView)>) {
     let mut offset = 0.0;
-    for (_, mut scroll_bar) in scroll_query.iter_mut().filter(|p| p.1.bar) {
+    for (_, scroll_bar) in scroll_query.iter_mut().filter(|p| p.1.bar) {
         offset = (scroll_bar.parent_top - scroll_bar.current_top) / scroll_bar.parent_len
     }
     for (mut view_style, mut scroll_view) in scroll_query.iter_mut().filter(|p| !p.1.bar) {
@@ -316,7 +316,7 @@ pub fn scroll_view_drag_system(mut scroll_query: Query<(&mut Style, &mut ScrollV
 
 fn text_filed_hidden(
     mut filed_query: Query<&mut Visibility, With<TextFiledHidden>>,
-    mut button_query: Query<&Interaction, (Changed<Interaction>, With<TextFiledHiddenButton>)>,
+    button_query: Query<&Interaction, (Changed<Interaction>, With<TextFiledHiddenButton>)>,
 ) {
     // println!("button pressed!");
     for button in button_query.iter() {
