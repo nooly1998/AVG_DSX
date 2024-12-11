@@ -13,7 +13,7 @@ struct ListShowText; // 用于控制列表可见性的组件
 #[derive(Component)]
 struct ItemVisibility(bool); // 用于控制列表可见性的组件
 
-#[derive(Resource, Default)]
+#[derive(Resource, Reflect, Default)]
 struct DropDownOptions {
     options: Vec<String>,
     selected_index: usize,
@@ -66,7 +66,15 @@ fn clicked_list_item(
             for entity in &button_child {
                 if let Ok(child_text) = text_query.get(*entity) {
                     text = child_text.sections[0].value.clone();
+                    let options = option.options.clone();
                     option.selected_option = text.clone();
+                    for (n, str) in options.iter().enumerate() {
+                        if let Some(ref_val) = str.downcast_ref::<String>() {
+                            if *ref_val == text {
+                                option.selected_index = n;
+                            }
+                        }
+                    }
                     for mut list_visibility in list_query.iter_mut() {
                         list_visibility.0 = false;
                     }
@@ -80,7 +88,7 @@ fn list_item_hidden_update(
     option: Res<DropDownOptions>,
     mut visibility_query: Query<(&mut Visibility), With<ItemVisibility>>,
     list_query: Query<&ListVisibility>,
-    mut text_query: Query<&mut Text,With<ListShowText>>,
+    mut text_query: Query<&mut Text, With<ListShowText>>,
 ) {
     for mut visibility in visibility_query.iter_mut() {
         for list in list_query.iter() {
@@ -91,7 +99,6 @@ fn list_item_hidden_update(
                 for mut list_text in text_query.iter_mut() {
                     list_text.sections[0].value = option.selected_option.clone();
                 }
-
             } else {
                 *visibility = Visibility::Inherited;
             }
@@ -194,7 +201,8 @@ fn spawn_entities(
                                         ..default()
                                     },
                                     ..default()
-                                }).insert(ListShowText);
+                                })
+                                .insert(ListShowText);
 
                                 btn.spawn(ImageBundle {
                                     style: Style {
