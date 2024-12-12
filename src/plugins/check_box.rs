@@ -138,7 +138,7 @@ fn checkbox_interaction(
 }
 
 // 使用示例
-fn entities_spawn(mut commands: Commands) {
+fn entities_spawn(mut commands: Commands,asset_server:Res<AssetServer>) {
 
     // Root node
     commands
@@ -186,11 +186,12 @@ fn entities_spawn(mut commands: Commands) {
                             disabled: false,
                         },
                     ));
-
+                    let font = asset_server.load("fonts/zfft.ttf");
                     // 标签文本
                     parent.spawn(TextBundle::from_section(
-                        "启用选项",
+                        "checkbox",
                         TextStyle {
+                            font,
                             font_size: 20.0,
                             color: Color::WHITE,
                             ..default()
