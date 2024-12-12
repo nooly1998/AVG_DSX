@@ -41,22 +41,37 @@ impl Default for Checkbox {
 
 fn update_checkboxes(
     mut commands: Commands,
-    mut query: Query<(Entity, &Checkbox, Option<&Children>)>,
-    mut check_query: Query<(&mut Style, &mut BackgroundColor, &Parent), With<CheckboxCheck>>,
+    query: Query<(Entity, &Checkbox, Option<&Children>)>,
+    check_query: Query<(&Children, &Parent), With<CheckboxBackground>>,
+    mut check_sign_query: Query<(&mut Style, &mut BackgroundColor), With<CheckboxCheck>>,
 ) {
     for (entity, checkbox, children) in query.iter() {
         match children {
             Some(children) => {
                 // 更新现有复选框
                 for &child in children.iter() {
-                    if let Ok((mut style, mut bg_color, parent)) = check_query.get_mut(child) {
+                    // assert_eq!(children.type_id(),child.type_id());
+                    if let Ok((children1, parent)) = check_query.get(child)
+                    {
+                        println!("checked!");
+
                         if parent.get() == entity {
-                            style.display = if checkbox.checked {
-                                Display::Flex
-                            } else {
-                                Display::None
-                            };
-                            bg_color.0 = checkbox.check_color;
+                            for &child1 in children1 {
+                                if let Ok((mut ch_style, mut ch_bg_color)) =
+                                    check_sign_query.get_mut(child1)
+                                {
+                                    ch_style.display = if checkbox.checked {
+                                        Display::Flex
+                                    } else {
+                                        Display::None
+                                    };
+                                    ch_bg_color.0 = checkbox.check_color;
+                                } else {
+                                    return;
+                                }
+                            }
+                        } else {
+                            return;
                         }
                     }
                 }
@@ -138,12 +153,12 @@ fn checkbox_interaction(
 }
 
 // 使用示例
-fn entities_spawn(mut commands: Commands,asset_server:Res<AssetServer>) {
-
+fn entities_spawn(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Root node
     commands
         .spawn(NodeBundle {
             style: Style {
+                top: Val::Px(100.0),
                 width: Val::Px(100.0),
                 height: Val::Px(100.0),
                 flex_direction: FlexDirection::Column,
