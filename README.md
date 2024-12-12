@@ -15,6 +15,8 @@ cargo build --release
 - **Background Update**: The Background in the game can be dynamically updated.
 - **Character Update**: The Character in the game can be dynamically updated.
 - **Scrolling View**: A scrolling view has been implemented, suitable for presenting long text scenarios.
+- **Processor Bar**
+- **Check Box**
 
 ## dependencies
 
