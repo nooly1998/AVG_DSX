@@ -1,4 +1,3 @@
-use crate::global_def::global_define::RESOLUTION_720P;
 use bevy::asset::AssetServer;
 use bevy::color::Color;
 use bevy::math::{Vec2, Vec3};
@@ -10,6 +9,7 @@ use bevy_kira_audio::prelude::*;
 use crate::core::event_bus::*;
 use crate::utils::string_utils::string_auto_split;
 use bevy::time::Timer;
+use crate::prelude::GameConfig;
 
 pub struct ScenePlayPlugin;
 
@@ -246,7 +246,7 @@ fn control_character_play(
     }
 }
 
-fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
+fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>,config:Res<GameConfig>) {
     let font = asset_server.load("fonts/zfft.ttf");
     let background_handle = asset_server.load("images/bg2_resized.png");
     let character_handle = asset_server.load("images/ch5.png");
@@ -270,7 +270,7 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio:
         .spawn(SpriteBundle {
             texture: character_handle,
             transform: Transform::from_translation(Vec3::new(
-                -(RESOLUTION_720P.0 / 4f32),
+                -(config.resolution.0 / 4f32),
                 0.0,
                 1.0,
             )),
@@ -285,9 +285,9 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio:
         font_size: 35.0,
         ..default()
     };
-    let box_size = Vec2::new(RESOLUTION_720P.0, RESOLUTION_720P.1 * 0.3);
-    let box_position = Vec2::new(0.0, -RESOLUTION_720P.1 / 4f32);
-    let box_text_position = Vec2::new(-RESOLUTION_720P.0 / 3f32, 0.0);
+    let box_size = Vec2::new(config.resolution.0, config.resolution.1 * 0.3);
+    let box_position = Vec2::new(0.0, -config.resolution.1 / 4f32);
+    let box_text_position = Vec2::new(-config.resolution.0 / 3f32, 0.0);
 
     commands
         .spawn(NodeBundle {
@@ -295,8 +295,8 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio:
                 display: Display::Flex,
                 width: Val::Percent(box_size.x),
                 height: Val::Percent(box_size.y),
-                padding: UiRect::all(Px(RESOLUTION_720P.0 * 0.01)),
-                top: Px(RESOLUTION_720P.1 * 0.7),
+                padding: UiRect::all(Px(config.resolution.0 * 0.01)),
+                top: Px(config.resolution.1 * 0.7),
                 ..default()
             },
             background_color: BackgroundColor::from(Color::srgb(0.25, 0.25, 0.75)),
@@ -327,7 +327,7 @@ fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>, audio:
                         .insert(TypingText {
                             full_text: string_auto_split(
                                 "欢迎游玩DS \n开始游戏",
-                                RESOLUTION_720P.0,
+                                config.resolution.0,
                                 35,
                             ),
                             displayed_text: "".to_string(),

@@ -3,32 +3,39 @@ mod global_def;
 mod plugins;
 mod utils;
 
-use crate::global_def::global_define::*;
-use crate::plugins::config::*;
-use crate::plugins::scene_play::*;
-use crate::plugins::scroll_view::*;
+pub mod prelude
+{
+    pub use crate::global_def::global_define::*;
+    pub use crate::plugins::config::*;
+    pub use crate::plugins::scene_play::*;
+    pub use crate::plugins::scroll_view::*;
+}
+
+use crate::prelude::*;
 use bevy::prelude::Val::Px;
 use bevy::{prelude::*, window::WindowResolution};
 
 fn main() {
+    let config = GameConfig::default();
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                resolution: WindowResolution::new(RESOLUTION_720P.0, RESOLUTION_720P.1),
+                resolution: WindowResolution::new(config.resolution.0, config.resolution.1),
                 title: "My AVG Game".to_string(),
                 ..Default::default()
             }),
             ..Default::default()
         }))
         .add_systems(Startup, setup)
+        .insert_resource(config)
         .insert_resource(Msaa::Sample4) // 启用抗锯齿， 4xMSAA
         .add_plugins((ScrollViewPlugin, ScenePlayPlugin, ConfigPlugin))
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let box_size = Vec2::new(RESOLUTION_720P.0, RESOLUTION_720P.1 * 0.3);
-    let box_text_position = Vec2::new(-RESOLUTION_720P.0 / 3f32, 0.0);
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, config:Res<GameConfig>) {
+    let box_size = Vec2::new(config.resolution.0, config.resolution.1 * 0.3);
+    let box_text_position = Vec2::new(-config.resolution.0 / 3f32, 0.0);
 
     commands
         .spawn((
@@ -37,8 +44,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     display: Display::Flex,
                     width: Val::Percent(box_size.x),
                     height: Val::Percent(30.0),
-                    padding: UiRect::all(Px(RESOLUTION_720P.0 * 0.01)),
-                    top: Px(RESOLUTION_720P.1 * 0.7 - 30.0 - 2.0 * RESOLUTION_720P.0 * 0.01),
+                    padding: UiRect::all(Px(config.resolution.0 * 0.01)),
+                    top: Px(config.resolution.1 * 0.7 - 30.0 - 2.0 * config.resolution.0 * 0.01),
                     ..default()
                 },
                 transform: Transform::from_translation(box_text_position.extend(1.0)),

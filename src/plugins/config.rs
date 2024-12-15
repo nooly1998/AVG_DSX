@@ -4,6 +4,7 @@ use bevy::a11y::accesskit::Size;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
 use crate::plugins::check_box::CheckboxPlugin;
+use crate::plugins::slider_bar::SliderBarPlugin;
 
 pub struct ConfigPlugin;
 
@@ -21,12 +22,13 @@ impl Plugin for ConfigPlugin {
                 },
                 ..default()
             })
+            .add_plugins(SliderBarPlugin)
             .add_plugins(ProgressBarPlugin)
             .add_plugins(CheckboxPlugin);
         // .add_systems(Update, );
     }
 }
 
-fn spawn_entities(mut commands: Commands, _asset_server: ResMut<AssetServer>) {
+fn spawn_entities( mut commands: Commands, _asset_server: ResMut<AssetServer>) {
 
 }

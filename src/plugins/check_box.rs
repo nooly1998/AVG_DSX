@@ -53,8 +53,6 @@ fn update_checkboxes(
                     // assert_eq!(children.type_id(),child.type_id());
                     if let Ok((children1, parent)) = check_query.get(child)
                     {
-                        println!("checked!");
-
                         if parent.get() == entity {
                             for &child1 in children1 {
                                 if let Ok((mut ch_style, mut ch_bg_color)) =

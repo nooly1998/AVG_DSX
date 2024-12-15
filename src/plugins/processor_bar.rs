@@ -91,7 +91,7 @@ fn update_progress_bars(
                     ))
                     .id();
 
-                commands.entity(background).push_children(&[fill]);
+                commands.entity(entity).push_children(&[fill]);
                 commands.entity(entity).push_children(&[background]);
             }
         }

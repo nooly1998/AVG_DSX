@@ -1,4 +1,3 @@
-use crate::global_def::global_define::RESOLUTION_720P;
 use bevy::app::{App, Plugin};
 use bevy::color::Color;
 use bevy::core::Name;
@@ -6,6 +5,7 @@ use bevy::input::mouse::MouseWheel;
 use bevy::math::Vec2;
 use bevy::prelude::Val::Px;
 use bevy::prelude::*;
+use crate::prelude::GameConfig;
 
 /// A Bevy Plugin for creating a scroll view functionality.
 ///
@@ -129,10 +129,10 @@ impl Plugin for ScrollViewPlugin {
 ///
 ///
 /// Ensure the appropriate resources (e.g., font files) exist in your asset folder.
-fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let view_size = Vec2::new(RESOLUTION_720P.0 * 0.3, RESOLUTION_720P.1 * 0.2);
-    let view_position = Vec2::new(RESOLUTION_720P.0 * 0.3, RESOLUTION_720P.1 * 0.4);
-    let cover_size = Vec2::new(RESOLUTION_720P.0 * 0.3, RESOLUTION_720P.1);
+fn spawn_entities(mut commands: Commands, asset_server: Res<AssetServer>,config:Res<GameConfig>) {
+    let view_size = Vec2::new(config.resolution.0 * 0.3, config.resolution.1 * 0.2);
+    let view_position = Vec2::new(config.resolution.0 * 0.3, config.resolution.1 * 0.4);
+    let cover_size = Vec2::new(config.resolution.0 * 0.3, config.resolution.1);
 
     commands
         .spawn((
